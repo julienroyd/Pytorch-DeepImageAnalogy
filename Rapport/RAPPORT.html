@@ -1,0 +1,240 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=768, initial-scale=1">
+<script src="http://distill.pub/template.v1.js"></script>
+<script type="text/front-matter">
+  title: Attention and Augmented Recurrent Neural Networks
+  description: A visual overview of neural attention, and the powerful extensions of neural networks being built on top of it.
+  authors:
+    - Julien Roy: https://github.com/julienroy13 
+    - David Kanaa: https://github.com/davidkanaa
+  affiliations:
+      - Polytechnique Montreal: polymtl.ca
+      - Polytechnique Montreal: polymtl.ca
+</script>
+<!-- Katex -->
+<script src="assets/lib/auto-render.min.js"></script>
+<script src="assets/lib/katex.min.js"></script>
+<link rel="stylesheet" href="assets/lib/katex.min.css">
+<link rel="stylesheet" type="text/css" href="assets/widgets.css">
+<link rel="stylesheet" type="text/css" href="assets/main.css">
+<!-- Required -->
+<script src="assets/lib/lib.js"></script>
+<script src="assets/utils.js"></script>
+<script>
+var renderQueue = [];
+
+function renderMath(elem) {
+    renderMathInElement(
+        elem, {
+            delimiters: [{
+                left: "$$",
+                right: "$$",
+                display: true
+            }, {
+                left: "$",
+                right: "$",
+                display: false
+            }, ]
+        }
+    );
+}
+
+var deleteQueue = [];
+
+function renderLoading(figure) {
+    var loadingScreen = figure.append("svg")
+        .style("width", figure.style("width"))
+        .style("height", figure.style("height"))
+        .style("position", "absolute")
+        .style("top", "0px")
+        .style("left", "0px")
+        .style("background", "white")
+        .style("border", "0px dashed #DDD")
+        .style("opacity", 1)
+
+    return function(callback) {
+        loadingScreen
+            .remove()
+    }
+
+}
+</script>
+
+<style>
+#previews figcaption {
+  text-align: center;
+}
+</style>
+
+
+    </head><body>
+        <dt-article class="left">
+            <h1>Deep Image Analogy</h1>
+            <h2>A Semantically Consistent Approach to Neural Style Transfer</h2>
+            <dt-byline></dt-byline>
+
+                <p>
+                    Image style transfer refers to the problem of transforming an image in such a way that it acquires the stylistic attributes of a reference image, while preserving its content information. For instance, color editing with respect to a reference image can be achieved by matching the target and the reference color histograms <dt-cite key="pouli2010"></dt-cite>. However, even if defining a complete definition of <i>style</i> would be difficult, most would agree that the stylistic attributes account for more than simply color. Some of these attributes however might be hard to describe or identify -- the style of a painting could lie in the brush strokes and the textures, the style of a photograph is partly defined by the lighting and tone nuances. 
+                </p>
+                <p>
+                    The fact that humans can appreciate and differentiate style without quite agreeing on how to describe it (even less on how to formalize it) makes machine learning a promising approach for that problem.
+                </p>
+                <p>
+                    Gatys <i>et al.</i> developped the first algorithm that uses a deep convolutional neural network (CNN) to capture and modelize the style of an image. This technique is refered to as <i>Neural Style Transfer</i><dt-cite key="gatys2016"></dt-cite>. However, while being able to produce impressive results, this approach fails to carry out style transfer in a manner that preserves the semantic correspondances between the two original images. For example, the algorithm won't distinguish the difference between the background and the main objects of both scenes, and thus will apply the style in an homogenous manner to the generated image without any regard about where which part of the style should be applied.
+                </p>
+                <p>
+                    Liao <i>et al.</i> solve that issue by introducing <i>Deep Image Analogy</i><dt-cite key="liao2017"></dt-cite></dt-cite>. This algorithm is inspired by the original Neural Style Transfer as it still uses a pretrained deep CNN to extract information about the images, but also cleverly apply the Patch Match method<dt-cite key="barnes2010"></dt-cite> on deep feature maps constructed by that CNN to take into account semantic correspondances between the two base images. Therefore, they iteratively progress in a coarse-to-fine manner (from the deeper to shallower representations) to generate the new latent image that both presents the style of one reference, and the content of another, in a semantically consistent fashion.
+                </p>
+                <hr> <!--Separation line-->
+            
+            <!-- SECTION ____________________________________________________________________________-->
+            <h2>A bit of theory</h2>
+                <p> Blablabla</p>
+
+
+            <!-- SECTION ____________________________________________________________________________-->
+            <h2>Algorithm</h2> 
+                <p> Blablabla</p>
+
+
+            <!-- SECTION ____________________________________________________________________________-->
+            <h2>Results</h2> 
+                <p> Blablabla</p>
+
+
+            <!-- SECTION ____________________________________________________________________________-->
+            <h2>Conclusion</h2> 
+                <p> Blablabla</p>
+
+
+            <!-- SECTION ____________________________________________________________________________-->
+            <h3>Examples of formatting</h3>
+                <p class="toRender">
+                    In a regular RNN, at <i>italic text</i>, the cell state $h_t$ is computed based on its own input and the cell state $h_t$ that encapsulates some information from the precedent inputs : $$h_t = f(W^{hx}x_t + W^{hh}h_{t-1})$$
+                </p>
+
+                <p>
+                    The following figure presents a Seq2Seq model with a two layers encoder and a two layers decoder:
+                    <img class="image" src="images/exemple.jpg">
+                </p>
+                <p>
+                    However, to better overcome the information bottleneck and long-term dependencies limitations, attentions model have been introduced. The basic idea of attention is that instead of attempting to learn a single vector representation for each sentence, we keep around vectors for every word in the input sentence, and reference these vectors at each decoding step.
+                </p>
+                <ul>
+                    <li>
+                        <p class="toRender">
+                            Blablabla
+                        </p>
+                    </li>
+                    <li>
+                        <p class="toRender">
+                            Blablabla $b_{t} = (b_{t0}, ... ,b_{tT})^T$ is then passed throught a softmax function.
+                            $$\alpha_{tj} = softmax(b_{tj}) = \frac{exp(b_{tj})}{\sum_{k=1}^{T} exp(b_{tk})}$$
+                        </p>
+                    </li>
+                    <li>
+                        <p class="toRender">
+                            Blablabla
+                        </p>
+                    </li>
+                </ul>
+                <p>
+                    Remember that for :
+                    </p><figure id="iteratespluserror" style="width:610px; height:105px; display:block; margin-left:auto; margin-right:auto; position:relative">
+                        <div style="position:relative; top:-35px">
+                            <span class="toRender" style="position:absolute; left:0px; top:0px">
+                                $$p(y_t = y_k|y_{&lt; t}, x)$$
+                            </span>
+                            <figcaption class="toRender" style="position:absolute; left:00px; top:105px; width:120px;">
+                                Caption here
+                            </figcaption>
+                            <span class="toRender" style="position:absolute; left:170px; top:0px">
+                                $$=$$
+                            </span>
+                            <span class="toRender" style="position:absolute; left:200px; top:0px">
+                                $$e^{w_k^Tg(y_{t-1}, h_t, c_t)}$$
+                            </span>
+                            <figcaption class="toRender" style="position:absolute; left:200px; top:105px;width:210px;">
+                                Caption there
+                            </figcaption>
+                            <span class="toRender" style="position:absolute; left:400px; top:0px">
+                                $$/$$
+                            </span>
+                            <span class="toRender" style="position:absolute; left:440px; top:-10px">
+                                $$\displaystyle{\sum_{k^{'} \in K} e^{w_{k^{'}}^Tf(y_{t-1}, h_t, c_t)}}$$
+                            </span>
+                            <figcaption class="toRender" style="position:absolute; left:440px; top:105px;width:200px;">
+                                Finally, the sum of all $|K|$ logits.
+                            </figcaption>
+                        </div>
+                    </figure>
+
+                <p>
+                    The main idea of the proposed approach is to approximate the second term of the gradient (i.e 
+                    <dt-fn>
+                    Small explanation in a box
+                    </dt-fn>)
+                    , by importance sampling 
+                    <dt-fn>
+                    Second eexplanation in a tiny beautiful box
+                </p>
+                <p class="toRender">
+                    <b>
+                        Bold stuff:
+                    </b>
+                    Blablablabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla.
+                </p>
+
+            
+        <dt-appendix class="centered">
+            </dt-appendix>
+            <h3>Acknowledgments</h3>
+                <p>We would like to thank...</p>
+        
+        <script type="text/javascript">
+        var el = document.getElementsByClassName("toRender")
+        for (var i = 0; i < el.length; i++) {
+            renderMath(el[i]);
+        }
+        </script>
+        
+<script type="text/bibliography">
+
+@article{liao2017,
+  title={Visual Attribute Transfer through Deep Image Analogy},
+  author={Liao, Jing and Yao, Yuan and Yuan, Lu and Hua, Gang and Kang, Sing Bing},
+  journal={arXiv preprint arXiv:1705.01088},
+  year={2017}
+}
+
+@inproceedings{gatys2016,
+  title={Image style transfer using convolutional neural networks},
+  author={Gatys, Leon A and Ecker, Alexander S and Bethge, Matthias},
+  booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition},
+  pages={2414--2423},
+  year={2016}
+}
+
+@inproceedings{barnes2010,
+  title={The generalized patchmatch correspondence algorithm},
+  author={Barnes, Connelly and Shechtman, Eli and Goldman, Dan B and Finkelstein, Adam},
+  booktitle={European Conference on Computer Vision},
+  pages={29--43},
+  year={2010},
+  organization={Springer}
+}
+
+@inproceedings{pouli2010,
+  title={Progressive histogram reshaping for creative color transfer and tone reproduction},
+  author={Pouli, Tania and Reinhard, Erik},
+  booktitle={Proceedings of the 8th International Symposium on Non-Photorealistic Animation and Rendering},
+  pages={81--90},
+  year={2010},
+  organization={ACM}
+}
+
+
+</script>
+
+
+</dt-article></body></html>
