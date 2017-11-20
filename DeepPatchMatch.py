@@ -48,20 +48,28 @@ def distance(PA1, PB2, PA2, PB1, mode="bidirectional"):
     return distance
 
 
-def initializeNNF(h, w):
+def initializeNNF(h, w, initialNNF=None):
     """ 
     Randomly initializes NNF_ab
     - NNF_ab[:,i,j] is a 2D vector representing the coordinates x,y 
       so that B[0,:,x,y] is most similar to A[0,:,i,j] 
     """
-    # Instanciates NNF_ab
-    NNF_ab = np.zeros(shape=(2,h,w), dtype=np.int)
-    
-    # Fill in NNF_ab[:,:,0] contains the coordinates x (row)
-    NNF_ab[0,:,:] = np.random.randint(low=0, high=h, size=(h,w))
+    if initialNNF == None:
+        # Instanciates NNF_ab
+        NNF_ab = np.zeros(shape=(2,h,w), dtype=np.int)
         
-    # Fill in NNF_ab[:,:,1] contains the coordinates y (column)
-    NNF_ab[1,:,:] = np.random.randint(low=0, high=w, size=(h,w))
+        # Fill in NNF_ab[:,:,0] contains the coordinates x (row)
+        NNF_ab[0,:,:] = np.random.randint(low=0, high=h, size=(h,w))
+            
+        # Fill in NNF_ab[:,:,1] contains the coordinates y (column)
+        NNF_ab[1,:,:] = np.random.randint(low=0, high=w, size=(h,w))
+
+    elif type(initialNNF) == np.ndarray and initialNNF.shape == (h,w):
+        # NNF_ab is intialized to initialNNF
+        NNF_ab = initialNNF
+
+    else:
+        raise ValueError('The provided "initialNNF" should be a ndarray of size ({0},{1})'.format(h,w))
     
     # Turns it into an autograd.Variable and send it on the GPU
     if torch.cuda.is_available() and False:
