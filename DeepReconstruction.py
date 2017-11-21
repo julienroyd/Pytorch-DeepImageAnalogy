@@ -5,7 +5,7 @@ import torch.optim as optim
 from torch.autograd import Variable
 
 # pseudo deconvolution operation implemented as a local optimisation problem
-def deconv(net, target, source, loss=nn.MSELoss, value=None, max_iter=2500):
+def deconv(net, target, source, loss=nn.MSELoss, value=None, max_iter=2500): # TODO : Get rid of source parameter and ask for size and dtype instead
     optimum = value if value is not None else Variable(torch.randn(source.size()).type_as(source.data), requires_grad=True)
     loss_fn = loss()
     
