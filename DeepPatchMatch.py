@@ -162,7 +162,7 @@ def randomSearch(A1, B2, A2, B1, h, w, NNF_ab, i, j):
     return NNF_ab
 
 
-def patchMatch(A1, B2, A2, B1, config):
+def computeNNF(A1, B2, A2, B1, config):
     """
     Computes the NNF function from A-s and B-s
     image 1 : an autograd.Variable of shape [batch, channels, heigth, width]
