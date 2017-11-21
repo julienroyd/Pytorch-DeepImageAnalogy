@@ -41,7 +41,7 @@ def get_weight_map(features, alpha, kappa = 300, tau = 0.05):
 
 # blends x with y using the weight map W: W*x + (1-W)*y
 def blend(x, y, W):
-    return W * x = (1 - W) * y
+    return W * x + (1 - W) * y
 
 # upsampling
 # mode = 'nearest'
