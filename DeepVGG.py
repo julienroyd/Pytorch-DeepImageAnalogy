@@ -82,3 +82,26 @@ prep = transforms.Compose([transforms.Scale(config['img_size']),
 postp = transforms.Compose([transforms.Lambda(lambda x: x.mul_(1./255)),
                            transforms.Normalize(mean=[-0.40760392, -0.45795686, -0.48501961], std=[1,1,1]), #add imagenet mean
                            ])
+
+
+
+# SUBNETS
+
+#
+class Layer(nn.Module):
+    def __init__(self, linear):
+        super(Layer, self).__init__()
+        self.linear = linear
+    
+    def forward(self, inputs):
+        outputs = self.linear(inputs)
+        return F.relu(outputs)
+    
+#
+class Net(nn.Module):
+    def __init__(self, layers):
+        super(Net, self).__init__()
+        self.layers = nn.Sequential(*layers)
+    
+    def forward(self, inputs):
+        return self.layers(inputs)
