@@ -24,7 +24,8 @@ def valid(coord, coord_limit, m):
 
 def warp(B1, NNF_ab):
     """ Warp exprimes the content of image A but only with pixels sampled from image B """
-    Warp = B1[:, NNF_ab[0,:,:], NNF_ab[1,:,:]]
+    NNF_ab = NNF_ab.type(torch.LongTensor).cuda()
+    Warp = B1.data[:, :, NNF_ab[0,:,:], NNF_ab[1,:,:]]
     
     return Warp
 
@@ -120,7 +121,7 @@ def propagate(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, shift):
     return NNF_ab
 
 
-def randomSearch(A1, B2, A2, B1, h, w, m, NNF_ab, i, j):
+def randomSearch(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, config):
 
     max_step = 5
     while max_step < max(h,w):
@@ -146,8 +147,8 @@ def randomSearch(A1, B2, A2, B1, h, w, m, NNF_ab, i, j):
             A2_random_patchMatch = Patch(B1, x, y, m)
 
             # Computes how good both matches are
-            current_match = euclideanDistance(A1_patch, A1_current_patchMatch, A2_patch, A2_current_patchMatch)
-            random_match = euclideanDistance(A1_patch, A1_random_patchMatch, A2_patch, A2_random_patchMatch)
+            current_match = distance(A1_patch, A1_current_patchMatch, A2_patch, A2_current_patchMatch)
+            random_match = distance(A1_patch, A1_random_patchMatch, A2_patch, A2_random_patchMatch)
             
             # Looks up which match is the best. If best match is current match, nothing is changed
             best_match = np.argmin(np.array([current_match, random_match]))
@@ -196,7 +197,6 @@ def computeNNF(A1, B2, A2, B1, config, initialNNF=None):
     
     # Executes the PatchMatch algorithm n_iter times
     for step in range(config['n_iter']):
-        print("Iteration {0} -----".format(step+1))
         if step%2 == 0:
             shift = 1
         else:
@@ -207,11 +207,11 @@ def computeNNF(A1, B2, A2, B1, config, initialNNF=None):
             if (i+1)%100 == 0 : print("Row : {0}".format(i+1))
             for j in j_range:
                 NNF_ab = propagate(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, shift)
-                NNF_ab = randomSearch(A1, B2, A2, B1, h, w, m, NNF_ab, i, j)
+                NNF_ab = randomSearch(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, config)
     
     NNF_final = NNF_ab[:, m:-m, m:-m]
     NNF_final -= m
-    
-    print("Done!")
+
+    print("PatchMatch done!")
     
     return NNF_final
