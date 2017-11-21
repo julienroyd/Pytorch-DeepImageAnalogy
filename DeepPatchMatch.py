@@ -1,3 +1,5 @@
+from config import config
+
 import torch
 import torch.nn.functional as F
 from torch.autograd import Variable
@@ -80,9 +82,7 @@ def initializeNNF(h, w, initialNNF=None):
     return NNF_ab
 
 
-def propagate(A1, B2, A2, B1, h, w, NNF_ab, i, j, shift):
-    # Patch half-size
-    m = int((config['patch_size'] - 1) / 2)
+def propagate(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, shift):
 
     # Extract the patches at coordinates i,j in A1 and A2
     A1_patch = Patch(A1,i,j,m)
@@ -120,9 +120,7 @@ def propagate(A1, B2, A2, B1, h, w, NNF_ab, i, j, shift):
     return NNF_ab
 
 
-def randomSearch(A1, B2, A2, B1, h, w, NNF_ab, i, j):
-    # Patch half-size
-    m = int((config['patch_size'] - 1) / 2)
+def randomSearch(A1, B2, A2, B1, h, w, m, NNF_ab, i, j):
 
     max_step = 5
     while max_step < max(h,w):
@@ -162,7 +160,7 @@ def randomSearch(A1, B2, A2, B1, h, w, NNF_ab, i, j):
     return NNF_ab
 
 
-def computeNNF(A1, B2, A2, B1, config):
+def computeNNF(A1, B2, A2, B1, config, initialNNF=None):
     """
     Computes the NNF function from A-s and B-s
     image 1 : an autograd.Variable of shape [batch, channels, heigth, width]
@@ -180,7 +178,7 @@ def computeNNF(A1, B2, A2, B1, config):
     m = int((config['patch_size'] - 1) / 2)
     
     # Randomly initializes NNF_ab
-    NNF_ab = initializeNNF(h,w)
+    NNF_ab = initializeNNF(h, w, initialNNF)
     
     # Zero-Pad images
     A1 = F.pad(A1, (m,m,m,m), mode='constant', value=0).data.float()
@@ -208,8 +206,8 @@ def computeNNF(A1, B2, A2, B1, config):
         for i in i_range:
             if (i+1)%100 == 0 : print("Row : {0}".format(i+1))
             for j in j_range:
-                NNF_ab = propagate(A1, B2, A2, B1, h, w, NNF_ab, i, j, shift)
-                NNF_ab = randomSearch(A1, B2, A2, B1, h, w, NNF_ab, i, j)
+                NNF_ab = propagate(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, shift)
+                NNF_ab = randomSearch(A1, B2, A2, B1, h, w, m, NNF_ab, i, j)
     
     NNF_final = NNF_ab[:, m:-m, m:-m]
     NNF_final -= m
