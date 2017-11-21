@@ -39,7 +39,7 @@ def get_weight_map(features, alpha, kappa = 300, tau = 0.05):
     x = torch.squeeze(x, 0)
     return alpha * torch.sigmoid(kappa * torch.norm(x, p=2) + tau)
 
-# blends x and y with weight map W: W*x + (1-W)*y
+# blends x with y using the weight map W: W*x + (1-W)*y
 def blend(x, y, W):
     return W * x = (1 - W) * y
 
