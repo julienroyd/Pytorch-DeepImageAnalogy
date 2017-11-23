@@ -106,13 +106,13 @@ for L in range(5,0,-1):
     print("L = {0}".format(L))
     
     # NNF search
-    if True: # TODO : Reactivate Upsampling
+    if L == 5: # TODO : Reactivate Upsampling
         initialNNF_ab = None
         initialNNF_ba = None
     
     else:
-        initialNNF_ab = DeepReconstruction.upsample(torch.unsqueeze(NNFs_ab[L+1], 0), FeatureMaps_A1[L].size()[-1], mode="nearest")
-        initialNNF_ba = DeepReconstruction.upsample(torch.unsqueeze(NNFs_ba[L+1], 0), FeatureMaps_A1[L].size()[-1], mode="nearest")
+        initialNNF_ab = DeepReconstruction.upsample(NNFs_ab[L+1], FeatureMaps_A1[L].size()[-1], mode="nearest")
+        initialNNF_ba = DeepReconstruction.upsample(NNFs_ba[L+1], FeatureMaps_A1[L].size()[-1], mode="nearest")
         
         
     NNFs_ab[L] = DeepPatchMatch.computeNNF(FeatureMaps_A1[L], FeatureMaps_B2[L], 
@@ -127,23 +127,18 @@ for L in range(5,0,-1):
         # Reconstruction for A2
         Warped_FeatureMaps_A2 = DeepPatchMatch.warp(FeatureMaps_B1[L], NNFs_ab[L])
         R_A2[L-1] = DeepReconstruction.deconv(net=subnets[L-1], target=Warped_FeatureMaps_A2, 
-                                                  source=FeatureMaps_B1[L-1], loss=nn.MSELoss, value=None, max_iter=300)
+                                                  source=FeatureMaps_B1[L-1], loss=nn.MSELoss, value=None, max_iter=10)
         FeatureMaps_A2[L-1] = DeepReconstruction.blend(FeatureMaps_A1[L-1], R_A2[L-1], DeepReconstruction.get_weight_map(FeatureMaps_A1[L-1], config["alphas"][L-1]))
 
         # Reconstruction for B2
         Warped_FeatureMaps_B2 = DeepPatchMatch.warp(FeatureMaps_A1[L], NNFs_ba[L])
         R_B2[L-1] = DeepReconstruction.deconv(net=subnets[L-1], target=Warped_FeatureMaps_B2, 
-                                                  source=FeatureMaps_A1[L-1], loss=nn.MSELoss, value=None, max_iter=300)
+                                                  source=FeatureMaps_A1[L-1], loss=nn.MSELoss, value=None, max_iter=10)
         FeatureMaps_B2[L-1] = DeepReconstruction.blend(FeatureMaps_A1[L-1], R_B2[L-1], DeepReconstruction.get_weight_map(FeatureMaps_B1[L-1], config["alphas"][L-1]))
         
-# NNF search
-if True: # TODO : Reactivate Upsampling
-    initialNNF_ab = None
-    initialNNF_ba = None
 
-else:
-    initialNNF_ab = DeepReconstruction.upsample(torch.unsqueeze(NNFs_ab[L+1], 0), FeatureMaps_A1[L].size()[-1], mode="nearest")
-    initialNNF_ba = DeepReconstruction.upsample(torch.unsqueeze(NNFs_ba[L+1], 0), FeatureMaps_A1[L].size()[-1], mode="nearest")
+initialNNF_ab = DeepReconstruction.upsample(NNFs_ab[2], FeatureMaps_A1[1].size()[-1], mode="nearest")
+initialNNF_ba = DeepReconstruction.upsample(NNFs_ba[2], FeatureMaps_A1[1].size()[-1], mode="nearest")
 
 Warped_A2 = DeepPatchMatch.warp(B1, initialNNF_ab)
 Warped_B2 = DeepPatchMatch.warp(A1, initialNNF_ba)
