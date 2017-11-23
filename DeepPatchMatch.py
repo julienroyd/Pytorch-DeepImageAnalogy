@@ -25,7 +25,7 @@ def valid(coord, coord_limit, m):
 def warp(B1, NNF_ab):
     """ Warp exprimes the content of image A but only with pixels sampled from image B """
     NNF_ab = NNF_ab.type(torch.LongTensor).cuda()
-    Warp = B1.data[:, :, NNF_ab[0,:,:], NNF_ab[1,:,:]]
+    Warp = B1[:, :, NNF_ab[0,:,:], NNF_ab[1,:,:]]
     
     return Warp
 
