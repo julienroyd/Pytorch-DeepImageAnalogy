@@ -1,4 +1,5 @@
 from config import config
+import utils
 import DeepReconstruction
 import DeepPatchMatch
 import DeepVGG
@@ -127,15 +128,24 @@ for L in range(5,0,-1):
         # Reconstruction for A2
         Warped_FeatureMaps_A2 = DeepPatchMatch.warp(FeatureMaps_B1[L], NNFs_ab[L])
         R_A2[L-1] = DeepReconstruction.deconv(net=subnets[L-1], target=Warped_FeatureMaps_A2, 
-                                                  source=FeatureMaps_B1[L-1], loss=nn.MSELoss, value=None, max_iter=300)
+                                                  source=FeatureMaps_B1[L-1], loss=nn.MSELoss, value=None, max_iter=config['n_iter_deconv'])
         FeatureMaps_A2[L-1] = DeepReconstruction.blend(FeatureMaps_A1[L-1], R_A2[L-1], DeepReconstruction.get_weight_map(FeatureMaps_A1[L-1], config["alphas"][L-1]))
 
         # Reconstruction for B2
         Warped_FeatureMaps_B2 = DeepPatchMatch.warp(FeatureMaps_A1[L], NNFs_ba[L])
         R_B2[L-1] = DeepReconstruction.deconv(net=subnets[L-1], target=Warped_FeatureMaps_B2, 
-                                                  source=FeatureMaps_A1[L-1], loss=nn.MSELoss, value=None, max_iter=300)
+                                                  source=FeatureMaps_A1[L-1], loss=nn.MSELoss, value=None, max_iter=config['n_iter_deconv'])
         FeatureMaps_B2[L-1] = DeepReconstruction.blend(FeatureMaps_A1[L-1], R_B2[L-1], DeepReconstruction.get_weight_map(FeatureMaps_B1[L-1], config["alphas"][L-1]))
-        
+
+print("\n--------\n--------\nOut of the main loop!")
+
+# Save the FeatureMaps (result of deconvolutions)
+utils.saveFeatureMaps('featureMaps_A1.pkl', FeatureMaps_A1)
+utils.saveFeatureMaps('featureMaps_A2.pkl', FeatureMaps_A2)
+utils.saveFeatureMaps('featureMaps_B1.pkl', FeatureMaps_B1)
+utils.saveFeatureMaps('featureMaps_B2.pkl', FeatureMaps_B2)
+
+"""
 # NNF search
 if True: # TODO : Reactivate Upsampling
     initialNNF_ab = None
@@ -147,3 +157,7 @@ else:
 
 Warped_A2 = DeepPatchMatch.warp(B1, initialNNF_ab)
 Warped_B2 = DeepPatchMatch.warp(A1, initialNNF_ba)
+"""
+
+
+print("-----DONE!-----")
