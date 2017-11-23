@@ -46,5 +46,8 @@ def blend(x, y, W):
 # upsampling
 # mode = 'nearest'
 def upsample(inputs, size, mode="nearest"):
-    x = Variable(inputs)
-    return F.upsample(x, size=size, mode=mode)
+    x = Variable(inputs.unsqueeze(0))
+    if not isinstance(inputs, torch.FloatTensor):
+        x = x.float()
+    o = F.upsample(x, size=size, mode=mode).squeeze(0).int()
+    return o.data

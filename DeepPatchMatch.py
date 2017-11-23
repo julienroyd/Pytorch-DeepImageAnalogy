@@ -57,7 +57,7 @@ def initializeNNF(h, w, initialNNF=None):
     - NNF_ab[:,i,j] is a 2D vector representing the coordinates x,y 
       so that B[0,:,x,y] is most similar to A[0,:,i,j] 
     """
-    if initialNNF == None:
+    if initialNNF is None:
         # Instanciates NNF_ab
         NNF_ab = np.zeros(shape=(2,h,w), dtype=np.int)
         
@@ -66,19 +66,21 @@ def initializeNNF(h, w, initialNNF=None):
             
         # Fill in NNF_ab[:,:,1] contains the coordinates y (column)
         NNF_ab[1,:,:] = np.random.randint(low=0, high=w, size=(h,w))
+        
+        NNF_ab = torch.from_numpy(NNF_ab)
 
-    elif type(initialNNF) == np.ndarray and initialNNF.shape == (h,w):
+    elif isinstance(initialNNF, torch.IntTensor) and initialNNF.size() == (2, w, h):
         # NNF_ab is intialized to initialNNF
         NNF_ab = initialNNF
 
     else:
-        raise ValueError('The provided "initialNNF" should be a ndarray of size ({0},{1})'.format(h,w))
+        raise ValueError('The provided "initialNNF" should be an torch.IntTensor of size ({0},{1}) but got type {2} of size {3} '.format(h,w,type(initalNNF),tuple(initial.size())))
     
     # Turns it into an autograd.Variable and send it on the GPU
     if torch.cuda.is_available() and False:
-        NNF_ab = Variable(torch.from_numpy(NNF_ab)).cuda()
+        NNF_ab = Variable(NNF_ab).cuda()
     else:
-        NNF_ab = Variable(torch.from_numpy(NNF_ab))
+        NNF_ab = Variable(NNF_ab)
     
     return NNF_ab
 

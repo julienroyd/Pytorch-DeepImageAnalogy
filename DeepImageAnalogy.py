@@ -107,13 +107,13 @@ for L in range(5,0,-1):
     print("L = {0}".format(L))
     
     # NNF search
-    if True: # TODO : Reactivate Upsampling
+    if L == 5: # TODO : Reactivate Upsampling
         initialNNF_ab = None
         initialNNF_ba = None
     
     else:
-        initialNNF_ab = DeepReconstruction.upsample(torch.unsqueeze(NNFs_ab[L+1], 0), FeatureMaps_A1[L].size()[-1], mode="nearest")
-        initialNNF_ba = DeepReconstruction.upsample(torch.unsqueeze(NNFs_ba[L+1], 0), FeatureMaps_A1[L].size()[-1], mode="nearest")
+        initialNNF_ab = DeepReconstruction.upsample(NNFs_ab[L+1], FeatureMaps_A1[L].size()[-1], mode="nearest")
+        initialNNF_ba = DeepReconstruction.upsample(NNFs_ba[L+1], FeatureMaps_A1[L].size()[-1], mode="nearest")
         
         
     NNFs_ab[L] = DeepPatchMatch.computeNNF(FeatureMaps_A1[L], FeatureMaps_B2[L], 
@@ -146,18 +146,13 @@ utils.saveFeatureMaps('featureMaps_B1.pkl', FeatureMaps_B1)
 utils.saveFeatureMaps('featureMaps_B2.pkl', FeatureMaps_B2)
 
 """
-# NNF search
-if True: # TODO : Reactivate Upsampling
-    initialNNF_ab = None
-    initialNNF_ba = None
-
-else:
-    initialNNF_ab = DeepReconstruction.upsample(torch.unsqueeze(NNFs_ab[L+1], 0), FeatureMaps_A1[L].size()[-1], mode="nearest")
-    initialNNF_ba = DeepReconstruction.upsample(torch.unsqueeze(NNFs_ba[L+1], 0), FeatureMaps_A1[L].size()[-1], mode="nearest")
+initialNNF_ab = DeepReconstruction.upsample(NNFs_ab[2], FeatureMaps_A1[1].size()[-1], mode="nearest")
+initialNNF_ba = DeepReconstruction.upsample(NNFs_ba[2], FeatureMaps_A1[1].size()[-1], mode="nearest")
 
 Warped_A2 = DeepPatchMatch.warp(B1, initialNNF_ab)
 Warped_B2 = DeepPatchMatch.warp(A1, initialNNF_ba)
 """
+
 
 
 print("-----DONE!-----")
