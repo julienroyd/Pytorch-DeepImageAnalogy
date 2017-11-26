@@ -1,11 +1,12 @@
 global config
 config = {}
-config['img_size'] = 128  # 64, 128, 256, 512
+config['img_size'] = 256  # 64, 128, 256, 512
 
 config['patch_size'] = 3 # For PatchMatch
 config['number_of_patches_per_zone'] = 1 # For randomSearch in PatchMatch
 config['n_iter'] = 3 # For PatchMatch
+config['distance_mode'] = 'unidirectional' # 'unidirectional' or 'bidirectional'
 
-config['n_iter_deconv'] = 500 # For Reconstruction
+config['n_iter_deconv'] = 600 # For Reconstruction
 
 config['alphas'] = [0.1, 0.6, 0.7, 0.8, 1.] # For reconstruction blending

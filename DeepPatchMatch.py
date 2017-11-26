@@ -4,7 +4,6 @@ import torch
 import torch.nn.functional as F
 from torch.autograd import Variable
 import numpy as np
-import matplotlib.pyplot as plt
 import os
 
 
@@ -85,7 +84,7 @@ def initializeNNF(h, w, initialNNF=None):
     return NNF_ab
 
 
-def propagate(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, shift):
+def propagate(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, shift, config):
 
     # Extract the patches at coordinates i,j in A1 and A2
     A1_patch = Patch(A1,i,j,m)
@@ -102,9 +101,9 @@ def propagate(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, shift):
     A2_upNeighbor_patchMatch = Patch(B1, NNF_ab[0,i,valid(j+shift,w,m)], NNF_ab[1,i,valid(j+shift,w,m)], m)
 
     # Computes the distance between current patch and the three potential matches ()
-    current_match = distance(A1_patch, A1_current_patchMatch, A2_patch, A2_current_patchMatch)
-    left_neighbor_match = distance(A1_patch, A1_leftNeighbor_patchMatch, A2_patch, A2_leftNeighbor_patchMatch)
-    up_neighbor_match = distance(A1_patch, A1_upNeighbor_patchMatch, A2_patch, A2_upNeighbor_patchMatch)
+    current_match = distance(A1_patch, A1_current_patchMatch, A2_patch, A2_current_patchMatch, mode=config['distance_mode'])
+    left_neighbor_match = distance(A1_patch, A1_leftNeighbor_patchMatch, A2_patch, A2_leftNeighbor_patchMatch, mode=config['distance_mode'])
+    up_neighbor_match = distance(A1_patch, A1_upNeighbor_patchMatch, A2_patch, A2_upNeighbor_patchMatch, mode=config['distance_mode'])
     
     # Looks up which match is the best. If best match is current match, nothing is changed
     best_match = np.argmin(np.array([current_match, left_neighbor_match, up_neighbor_match]))
@@ -149,8 +148,8 @@ def randomSearch(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, config):
             A2_random_patchMatch = Patch(B1, x, y, m)
 
             # Computes how good both matches are
-            current_match = distance(A1_patch, A1_current_patchMatch, A2_patch, A2_current_patchMatch)
-            random_match = distance(A1_patch, A1_random_patchMatch, A2_patch, A2_random_patchMatch)
+            current_match = distance(A1_patch, A1_current_patchMatch, A2_patch, A2_current_patchMatch, mode=config['distance_mode'])
+            random_match = distance(A1_patch, A1_random_patchMatch, A2_patch, A2_random_patchMatch, mode=config['distance_mode'])
             
             # Looks up which match is the best. If best match is current match, nothing is changed
             best_match = np.argmin(np.array([current_match, random_match]))
@@ -208,7 +207,7 @@ def computeNNF(A1, B2, A2, B1, config, initialNNF=None):
         for i in i_range:
             if (i+1)%100 == 0 : print("Row : {0}".format(i+1))
             for j in j_range:
-                NNF_ab = propagate(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, shift)
+                NNF_ab = propagate(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, shift, config)
                 NNF_ab = randomSearch(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, config)
     
     NNF_final = NNF_ab[:, m:-m, m:-m]
