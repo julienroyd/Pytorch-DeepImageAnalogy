@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 
 def build_model(path):
     # Instanciates the model
-    vgg = DeepVGG.VGG(pool="avg")
+    vgg = DeepVGG.VGG(pool=config['pool_mode'])
 
     # Load the parameters saved in vgg_conv.pth
     vgg.load_state_dict(torch.load(path))
@@ -129,13 +129,13 @@ for L in range(5,0,-1):
         # Reconstruction for A2
         Warped_FeatureMaps_A2 = DeepPatchMatch.warp(FeatureMaps_B1[L], NNFs_ab[L])
         R_A2[L-1] = DeepReconstruction.deconv(net=subnets[L-1], target=Warped_FeatureMaps_A2, 
-                                                  source=FeatureMaps_B1[L-1], loss=nn.L1Loss, value=None, max_iter=config['n_iter_deconv'])
+                                                  source=FeatureMaps_B1[L-1], loss=config['loss_fct'], value=None, max_iter=config['n_iter_deconv'])
         FeatureMaps_A2[L-1] = DeepReconstruction.blend(FeatureMaps_A1[L-1], R_A2[L-1], DeepReconstruction.get_weight_map(FeatureMaps_A1[L-1], config["alphas"][L-1]))
 
         # Reconstruction for B2
         Warped_FeatureMaps_B2 = DeepPatchMatch.warp(FeatureMaps_A1[L], NNFs_ba[L])
         R_B2[L-1] = DeepReconstruction.deconv(net=subnets[L-1], target=Warped_FeatureMaps_B2, 
-                                                  source=FeatureMaps_B1[L-1], loss=nn.L1Loss, value=None, max_iter=config['n_iter_deconv'])
+                                                  source=FeatureMaps_B1[L-1], loss=config['loss_fct'], value=None, max_iter=config['n_iter_deconv'])
         FeatureMaps_B2[L-1] = DeepReconstruction.blend(FeatureMaps_B1[L-1], R_B2[L-1], DeepReconstruction.get_weight_map(FeatureMaps_B1[L-1], config["alphas"][L-1]))
 
 print("\n--------\n--------\nOut of the main loop!")
@@ -149,24 +149,5 @@ utils.saveFeatureMaps('featureMaps_A1.pkl', FeatureMaps_A1)
 utils.saveFeatureMaps('featureMaps_A2.pkl', FeatureMaps_A2)
 utils.saveFeatureMaps('featureMaps_B1.pkl', FeatureMaps_B1)
 utils.saveFeatureMaps('featureMaps_B2.pkl', FeatureMaps_B2)
-
-print("Final patch-aggregation...")
-# Converts the final NNFs from torch Tensors to ndarrays and reshapes in [height, width, channels]
-NNF_ab_final = np.transpose(NNFs_ab[1].numpy(), axes=(1,2,0))
-NNF_ba_final = np.transpose(NNFs_ba[1].numpy(), axes=(1,2,0))
-
-# Convert PIL Images to ndarrays
-A1 = np.asarray(A1)
-B1 = np.asarray(B1)
-
-# Warps to create the final images
-A2 = B1[NNF_ab_final[:,:,0], NNF_ab_final[:,:,1], :]
-B2 = A1[NNF_ba_final[:,:,0], NNF_ba_final[:,:,1], :]
-
-# Saves the final images
-plt.imsave(os.path.join('Results', 'A2.png'), A2)
-plt.imsave(os.path.join('Results', 'B2.png'), B2)
-
-
 
 print("-----DONE!-----")
