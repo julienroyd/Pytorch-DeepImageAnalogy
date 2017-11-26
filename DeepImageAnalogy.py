@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 
 def build_model(path):
     # Instanciates the model
-    vgg = DeepVGG.VGG()
+    vgg = DeepVGG.VGG(pool="avg")
 
     # Load the parameters saved in vgg_conv.pth
     vgg.load_state_dict(torch.load(path))
@@ -30,6 +30,7 @@ def build_model(path):
 
     # Put the model on GPU    
     if torch.cuda.is_available():
+        torch.cuda.set_device(device=2)
         vgg.cuda()
     
     return vgg
@@ -112,8 +113,8 @@ for L in range(5,0,-1):
         initialNNF_ba = None
     
     else:
-        initialNNF_ab = DeepReconstruction.upsample(NNFs_ab[L+1], FeatureMaps_A1[L].size()[-1], mode="nearest")
-        initialNNF_ba = DeepReconstruction.upsample(NNFs_ba[L+1], FeatureMaps_A1[L].size()[-1], mode="nearest")
+       initialNNF_ab = DeepReconstruction.upsample(NNFs_ab[L+1], FeatureMaps_A1[L].size()[-1], mode="nearest")
+       initialNNF_ba = DeepReconstruction.upsample(NNFs_ba[L+1], FeatureMaps_A1[L].size()[-1], mode="nearest")
         
         
     NNFs_ab[L] = DeepPatchMatch.computeNNF(FeatureMaps_A1[L], FeatureMaps_B2[L], 
@@ -128,30 +129,43 @@ for L in range(5,0,-1):
         # Reconstruction for A2
         Warped_FeatureMaps_A2 = DeepPatchMatch.warp(FeatureMaps_B1[L], NNFs_ab[L])
         R_A2[L-1] = DeepReconstruction.deconv(net=subnets[L-1], target=Warped_FeatureMaps_A2, 
-                                                  source=FeatureMaps_B1[L-1], loss=nn.MSELoss, value=None, max_iter=config['n_iter_deconv'])
+                                                  source=FeatureMaps_B1[L-1], loss=nn.L1Loss, value=None, max_iter=config['n_iter_deconv'])
         FeatureMaps_A2[L-1] = DeepReconstruction.blend(FeatureMaps_A1[L-1], R_A2[L-1], DeepReconstruction.get_weight_map(FeatureMaps_A1[L-1], config["alphas"][L-1]))
 
         # Reconstruction for B2
         Warped_FeatureMaps_B2 = DeepPatchMatch.warp(FeatureMaps_A1[L], NNFs_ba[L])
         R_B2[L-1] = DeepReconstruction.deconv(net=subnets[L-1], target=Warped_FeatureMaps_B2, 
-                                                  source=FeatureMaps_A1[L-1], loss=nn.MSELoss, value=None, max_iter=config['n_iter_deconv'])
-        FeatureMaps_B2[L-1] = DeepReconstruction.blend(FeatureMaps_A1[L-1], R_B2[L-1], DeepReconstruction.get_weight_map(FeatureMaps_B1[L-1], config["alphas"][L-1]))
+                                                  source=FeatureMaps_B1[L-1], loss=nn.L1Loss, value=None, max_iter=config['n_iter_deconv'])
+        FeatureMaps_B2[L-1] = DeepReconstruction.blend(FeatureMaps_B1[L-1], R_B2[L-1], DeepReconstruction.get_weight_map(FeatureMaps_B1[L-1], config["alphas"][L-1]))
 
 print("\n--------\n--------\nOut of the main loop!")
 
-# Save the FeatureMaps (result of deconvolutions)
+# Saves the NNFs
+utils.saveNNFs('NNFs_ab.pkl', NNFs_ab)
+utils.saveNNFs('NNFs_ba.pkl', NNFs_ba)
+
+# Saves the FeatureMaps (result of deconvolutions)
 utils.saveFeatureMaps('featureMaps_A1.pkl', FeatureMaps_A1)
 utils.saveFeatureMaps('featureMaps_A2.pkl', FeatureMaps_A2)
 utils.saveFeatureMaps('featureMaps_B1.pkl', FeatureMaps_B1)
 utils.saveFeatureMaps('featureMaps_B2.pkl', FeatureMaps_B2)
 
-"""
-initialNNF_ab = DeepReconstruction.upsample(NNFs_ab[2], FeatureMaps_A1[1].size()[-1], mode="nearest")
-initialNNF_ba = DeepReconstruction.upsample(NNFs_ba[2], FeatureMaps_A1[1].size()[-1], mode="nearest")
+print("Final patch-aggregation...")
+# Converts the final NNFs from torch Tensors to ndarrays and reshapes in [height, width, channels]
+NNF_ab_final = np.transpose(NNFs_ab[1].numpy(), axes=(1,2,0))
+NNF_ba_final = np.transpose(NNFs_ba[1].numpy(), axes=(1,2,0))
 
-Warped_A2 = DeepPatchMatch.warp(B1, initialNNF_ab)
-Warped_B2 = DeepPatchMatch.warp(A1, initialNNF_ba)
-"""
+# Convert PIL Images to ndarrays
+A1 = np.asarray(A1)
+B1 = np.asarray(B1)
+
+# Warps to create the final images
+A2 = B1[NNF_ab_final[:,:,0], NNF_ab_final[:,:,1], :]
+B2 = A1[NNF_ba_final[:,:,0], NNF_ba_final[:,:,1], :]
+
+# Saves the final images
+plt.imsave(os.path.join('Results', 'A2.png'), A2)
+plt.imsave(os.path.join('Results', 'B2.png'), B2)
 
 
 
