@@ -17,8 +17,9 @@ def deconv(net, target, source, loss=nn.MSELoss, value=None, max_iter=2500): # T
     while n_iter[0] <= max_iter:
 
         def closure():
+            t = target.detach()
             optimizer.zero_grad()
-            loss = loss_fn(net(optimum), target)
+            loss = loss_fn(net(optimum), t)
             loss.backward()
             n_iter[0]+=1
             #print loss
