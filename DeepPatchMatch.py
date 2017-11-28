@@ -109,6 +109,15 @@ def propagate(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, shift, config):
     best_match = np.argmin(np.array([current_match, left_neighbor_match, up_neighbor_match]))
 
     if best_match == 1:
+        # New patch-match in B is the same than for left-neighbor in A
+        NNF_ab[:,i,j] = NNF_ab[:,valid(i+shift,h,m),j]
+
+    if best_match == 2:
+        # New patch-match in B is the same than for up-neighbor in A
+        NNF_ab[:,i,j] = NNF_ab[:,i,valid(j+shift,w,m)]
+    
+    """
+    if best_match == 1:
         # New patch-match in B based on left-neighbor's match
         NNF_ab[0,i,j] = NNF_ab[0,i+shift,j]
         NNF_ab[1,i,j] = valid(NNF_ab[1,i+shift,j]+1, w, m)
@@ -117,7 +126,7 @@ def propagate(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, shift, config):
         # New patch-match in B based on up-neighbor's match
         NNF_ab[0,i,j] = valid(NNF_ab[0,i,j+shift]+1, h, m)
         NNF_ab[1,i,j] = NNF_ab[1,i,j+shift]
-
+    """
 
     return NNF_ab
 
