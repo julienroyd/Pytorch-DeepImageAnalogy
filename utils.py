@@ -16,7 +16,7 @@ def saveNNFs(filename, NNFs_xy):
         print('saved in : {0}'.format(os.path.join('Results', filename)))
 
 
-def loadFeatureMaps(filename):
+def loadNNFs(filename):
     with open(os.path.join('Results', filename), 'rb') as f:
         NNFs_xy = pickle.load(f)
 
