@@ -30,7 +30,7 @@ def build_model(path):
 
     # Put the model on GPU    
     if torch.cuda.is_available():
-        torch.cuda.set_device(device=2)
+        torch.cuda.set_device(device=config['device'])
         vgg.cuda()
     
     return vgg

@@ -3,6 +3,9 @@ import torch
 global config
 config = {}
 
+# GPU to run on
+config['device'] = 0 # 0,1,2 or 3
+
 # VGG
 config['img_size'] = 256  # 64, 128, 256, 512
 config['pool_mode'] = 'avg' # 'avg' or 'max'
@@ -18,4 +21,4 @@ config['n_iter_deconv'] = 4500 # For Reconstruction
 config['optimizer'] = torch.optim.Adamax # torch.optim.Adamax, torch.optim.LBFGS
 config['loss_fct'] = torch.nn.L1Loss # torch.nn.L1Loss, torch.nn.MSELoss
 config['alphas'] = [0.1, 0.6, 0.7, 0.8, 1.] # For reconstruction blending
-config['upsampling_ON'] = {1:True, 2:False, 3:False, 4:False, 5:False}
+config['upsampling_ON'] = {1:True, 2:True, 3:False, 4:False, 5:False}
