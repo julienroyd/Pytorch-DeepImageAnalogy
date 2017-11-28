@@ -34,13 +34,15 @@ def deconv(net, target, source, loss=nn.MSELoss, value=None, max_iter=2500): # T
 
 # determines the weight map 
 def get_weight_map(features, alpha, kappa = 300, tau = 0.05):
-    # feature maps of shape [batch_size n_channels, height, width]
+    # feature maps of shape [batch_size, n_channels, height, width]
     # normalize features maps across the channel dimension
-    x = F.normalize(features, p=1, dim=1)
+    x = torch.norm(features, p=2, dim=1)
     # we suppose the batch size is 1 as we use 1 image only (this may change later?)
     # thus, we remove the batch dimension
     x = torch.squeeze(x, 0)
-    return alpha * torch.sigmoid(kappa * torch.norm(x, p=2) + tau)
+    x = x*x
+    x = x / torch.max(x)
+    return alpha * torch.sigmoid(kappa * (x + tau))
 
 # blends x with y using the weight map W: W*x + (1-W)*y
 def blend(x, y, W):
@@ -53,4 +55,5 @@ def upsample(inputs, size, mode="nearest"):
     if not isinstance(inputs, torch.FloatTensor):
         x = x.float()
     o = F.upsample(x, size=size, mode=mode).squeeze(0).int()
-    return o.data
+    o_adapted = 2 * o
+    return o_adapted.data
