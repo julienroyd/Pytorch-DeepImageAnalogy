@@ -11,7 +11,7 @@ def deconv(net, target, source, loss=nn.MSELoss, value=None, max_iter=2500): # T
     optimum = value if value is not None else Variable(torch.randn(source.size()).type_as(source.data), requires_grad=True)
     loss_fn = loss()
     
-    optimizer = config['optimizer']
+    optimizer = config['optimizer']([optimum])
     
     show_iter = 50
     n_iter=[0]
