@@ -126,11 +126,11 @@ for L in range(5,0,-1):
         
     NNFs_ab[L] = DeepPatchMatch.computeNNF(FeatureMaps_A1[L], FeatureMaps_B2[L], 
                                            FeatureMaps_A2[L], FeatureMaps_B1[L], 
-                                           config, initialNNF=initialNNF_ab)
+                                           L, config, initialNNF=initialNNF_ab)
     
     NNFs_ba[L] = DeepPatchMatch.computeNNF(FeatureMaps_B1[L], FeatureMaps_A2[L], 
                                            FeatureMaps_B2[L], FeatureMaps_A1[L], 
-                                           config, initialNNF=initialNNF_ba)
+                                           L, config, initialNNF=initialNNF_ba)
 
     if L > 1:
         # Reconstruction for A2
