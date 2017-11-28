@@ -56,8 +56,13 @@ def get_featureMaps(A1, B1, model):
     
     return FeatureMaps_A1, FeatureMaps_B1
 
+print("\n\nRunning on GPU? ", torch.cuda.is_available())
 
-print("Running on GPU? ", torch.cuda.is_available())
+print("--CONFIGS--")
+for k, v in zip(config.keys(), config.values()):
+    print("{0} : {1}".format(k, v))
+print("-----------")
+
 # THE SCRIPT -----------------------------------------------
 
 A1 = Image.open(os.path.join('Images', "avatar.png"))
@@ -108,13 +113,15 @@ for L in range(5,0,-1):
     print("L = {0}".format(L))
     
     # NNF search
-    if L == 5: # TODO : Reactivate Upsampling
-        initialNNF_ab = None
-        initialNNF_ba = None
+    if config['upsampling_ON'][L]:
+        print('Upsampling ON')
+        initialNNF_ab = DeepReconstruction.upsample(NNFs_ab[L+1], FeatureMaps_A1[L].size()[-1], mode="nearest")
+        initialNNF_ba = DeepReconstruction.upsample(NNFs_ba[L+1], FeatureMaps_A1[L].size()[-1], mode="nearest")
     
     else:
-       initialNNF_ab = DeepReconstruction.upsample(NNFs_ab[L+1], FeatureMaps_A1[L].size()[-1], mode="nearest")
-       initialNNF_ba = DeepReconstruction.upsample(NNFs_ba[L+1], FeatureMaps_A1[L].size()[-1], mode="nearest")
+        print('Upsampling OFF')
+        initialNNF_ab = None
+        initialNNF_ba = None
         
         
     NNFs_ab[L] = DeepPatchMatch.computeNNF(FeatureMaps_A1[L], FeatureMaps_B2[L], 
