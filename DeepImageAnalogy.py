@@ -148,13 +148,13 @@ for L in range(5,0,-1):
 print("\n--------\n--------\nOut of the main loop!")
 
 # Saves the NNFs
-utils.saveNNFs('NNFs_ab.pkl', NNFs_ab)
-utils.saveNNFs('NNFs_ba.pkl', NNFs_ba)
+utils.saveNNFs(os.path.join('Results', 'NNFs_ab.pkl'), NNFs_ab)
+utils.saveNNFs(os.path.join('Results', 'NNFs_ba.pkl'), NNFs_ba)
 
 # Saves the FeatureMaps (result of deconvolutions)
-utils.saveFeatureMaps('featureMaps_A1.pkl', FeatureMaps_A1)
-utils.saveFeatureMaps('featureMaps_A2.pkl', FeatureMaps_A2)
-utils.saveFeatureMaps('featureMaps_B1.pkl', FeatureMaps_B1)
-utils.saveFeatureMaps('featureMaps_B2.pkl', FeatureMaps_B2)
+utils.saveFeatureMaps(os.path.join('Results', 'featureMaps_A1.pkl'), FeatureMaps_A1)
+utils.saveFeatureMaps(os.path.join('Results', 'featureMaps_A2.pkl'), FeatureMaps_A2)
+utils.saveFeatureMaps(os.path.join('Results', 'featureMaps_B1.pkl'), FeatureMaps_B1)
+utils.saveFeatureMaps(os.path.join('Results', 'featureMaps_B2.pkl'), FeatureMaps_B2)
 
 print("-----DONE!-----")
