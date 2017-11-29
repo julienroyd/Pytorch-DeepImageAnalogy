@@ -234,10 +234,10 @@ def computeNNF(A1, B2, A2, B1, L, config, initialNNF=None):
     NNF_ab = initializeNNF(h, w, initialNNF)
     
     # Zero-Pad images
-    A1 = F.normalize(F.pad(A1, (m,m,m,m), mode='constant', value=0).data.float())
-    A2 = F.normalize(F.pad(A2, (m,m,m,m), mode='constant', value=0).data.float())
-    B1 = F.normalize(F.pad(B1, (m,m,m,m), mode='constant', value=0).data.float())
-    B2 = F.normalize(F.pad(B2, (m,m,m,m), mode='constant', value=0).data.float())
+    A1 = F.normalize(F.pad(A1, (m,m,m,m), mode='reflect').data).float()
+    A2 = F.normalize(F.pad(A2, (m,m,m,m), mode='reflect').data).float()
+    B1 = F.normalize(F.pad(B1, (m,m,m,m), mode='reflect').data).float()
+    B2 = F.normalize(F.pad(B2, (m,m,m,m), mode='reflect').data).float()
     
     # Zero-Pad NNF_ab so its coordinate system as well as the values it contains remain consistent with the images
     NNF_ab += m
