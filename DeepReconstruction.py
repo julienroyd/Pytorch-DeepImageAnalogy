@@ -41,8 +41,8 @@ def get_weight_map(features, alpha, kappa = 300, tau = 0.05):
     # thus, we remove the batch dimension
     x = torch.squeeze(x, 0)
     x = x*x
-    x = x / torch.max(x)
-    return alpha * torch.sigmoid(kappa * (x + tau))
+    x = (x - torch.min(x)) / (torch.max(x) - torch.min(x))
+    return alpha * torch.sigmoid(kappa * (x - tau))
 
 # blends x with y using the weight map W: W*x + (1-W)*y
 def blend(x, y, W):
