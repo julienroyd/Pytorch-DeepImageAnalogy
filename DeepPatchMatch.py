@@ -221,7 +221,7 @@ def computeNNF(A1, B2, A2, B1, L, config, initialNNF=None):
     """
     
     # Makes sure the two images have the same size
-    if A1.size() != B2.size() and A2.size() != B1.size() and A1.size() != A2.size() :
+    if A1.size() != B2.size() or A2.size() != B1.size() or A1.size() != A2.size() :
         raise ValueError("All the images must have the same size.")
     
     # Heigth and Width of images
