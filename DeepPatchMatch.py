@@ -39,7 +39,7 @@ def distance(PA1, PB2, PA2, PB1, mode="bidirectional"):
     """ Returns the bidirectional distance as described in the paper """
     
     if mode == "unidirectional":
-        distance = euclideanDistance(PA1, PB2)
+        distance = euclideanDistance(PA2, PB1)
 
     elif mode == "bidirectional":
         distance = euclideanDistance(PA1, PB2) + euclideanDistance(PA2, PB1) 
@@ -180,10 +180,17 @@ def randomSearch(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, L, config):
 
     max_step = config['random_search_max_step'][L]
 
-    for k in range(config['number_of_patches_per_zone']):
+    for k in range(config['number_of_random_patches'][L]):
+
+        # Makes sure we sample our random step to end up in a valid coordinate (within the image)
+        max_up_step = min(i - m, max_step)
+        max_down_step = min(h + m - 1 - i, max_step)
+        max_left_step = min(j - m, max_step)
+        max_right_step = min(w + m - 1 - j, max_step)
 
         # The randomly sampled coordinates for the random patch-match
-        [x, y] = NNF_ab[:,i,j].numpy() + np.random.randint(low=-max_step, high=max_step, size=(2,))
+        [x, y] = NNF_ab[:,i,j].numpy() + np.concatenate((np.random.randint(low=-max_up_step, high=max_down_step, size=(1,)), 
+                                                         np.random.randint(low=-max_left_step, high=max_right_step, size=(1,))))
 
         # Makes sure that those coordinates lie within the limits of our image
         x = valid(x, h, m)
@@ -244,16 +251,24 @@ def computeNNF(A1, B2, A2, B1, L, config, initialNNF=None):
     NNF_ab += m
     NNF_ab = torch.squeeze(F.pad(NNF_ab.unsqueeze(0), (m,m,m,m), mode='constant', value=0)).data
     
-    # Defines valid ranges (exclude the padded indexes)
-    i_range = np.arange(h) + m
-    j_range = np.arange(w) + m
-    
     # Executes the PatchMatch algorithm n_iter times
     for step in range(config['n_iter']):
         if step%2 == 0:
-            shift = 1
-        else:
             shift = -1
+
+            # Defines valid ranges (exclude the padded indexes)
+            i_range = np.arange(h) + m
+            j_range = np.arange(w) + m
+        
+        else:
+            shift = 1
+
+            # Defines valid ranges (exclude the padded indexes)
+            i_range = np.arange(h) + m
+            j_range = np.arange(w) + m
+
+            i_range = i_range[::-1]
+            j_range = j_range[::-1]
         
         # For every valid pixel in the image
         for i in i_range:
