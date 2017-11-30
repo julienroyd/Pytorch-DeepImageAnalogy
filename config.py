@@ -7,16 +7,16 @@ config = {}
 # GPU to run on
 config['device'] = 3 # 0,1,2 or 3
 config['image1_path'] = os.path.join('Images', "avatar.png")
-config['image2_path'] = os.path.join('Images', "joconde.png")
+config['image2_path'] = os.path.join('Images', "chris.png")
 
 # VGG
-config['img_size'] = 224  # 64, 128, 256, 512
+config['img_size'] = 256  # 64, 128, 256, 512
 config['pool_mode'] = 'avg' # 'avg' or 'max'
 
 # PATCH-MATCH
 config['patch_size'] = {1:5, 2:5, 3:3, 4:3, 5:3} # For PatchMatch
-config['number_of_patches_per_zone'] = 1 # For randomSearch in PatchMatch
-config['n_iter'] = 3 # For PatchMatch
+config['number_of_random_patches'] = {1:3, 2:3, 3:4, 4:4, 5:25} # For randomSearch in PatchMatch
+config['n_iter'] = 4 # For PatchMatch
 config['distance_mode'] = 'bidirectional' # 'unidirectional' or 'bidirectional'
 config['propagation_mode'] = 'NoNM' # 'NoNM'(Neighbor of Neighbor's Match) or 'NM'(Neighbor's Match)
 config['random_search_max_step'] = {1:4, 2:4, 3:6, 4:6, 5:14} 
