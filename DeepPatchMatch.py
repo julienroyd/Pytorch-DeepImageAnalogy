@@ -178,9 +178,10 @@ def propagate(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, shift, config):
 
 def randomSearch(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, L, config):
 
-    max_step = config['random_search_max_step'][L] // 2
+    max_step = config['random_search_max_step'][L]
 
     for k in range(config['number_of_patches_per_zone']):
+
         # The randomly sampled coordinates for the random patch-match
         [x, y] = NNF_ab[:,i,j].numpy() + np.random.randint(low=-max_step, high=max_step, size=(2,))
 
@@ -228,7 +229,7 @@ def computeNNF(A1, B2, A2, B1, L, config, initialNNF=None):
     [h,w] = A1.size()[2:]
      
     # Patch half-size
-    m = int((config['patch_size'][L] - 1) / 2)
+    m = config['patch_size'][L] // 2
     
     # Randomly initializes NNF_ab
     NNF_ab = initializeNNF(h, w, initialNNF)

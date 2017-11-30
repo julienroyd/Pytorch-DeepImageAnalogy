@@ -65,8 +65,8 @@ print("-----------")
 
 # THE SCRIPT -----------------------------------------------
 
-A1 = Image.open(os.path.join('Images', "avatar.png"))
-B1 = Image.open(os.path.join('Images', "joconde.png"))
+A1 = Image.open(config['image1_path'])
+B1 = Image.open(config['image2_path'])
 
 # Builds the model (on GPU if available)
 vgg = build_model(path=os.path.join('Model', 'vgg_conv.pth'))
@@ -91,17 +91,21 @@ R_B2 = {}
 # Subnets for reconstruction
 subnets = []
 subnets += [Net([Layer(vgg.conv1_1)])]
+
 subnets += [Net([Layer(vgg.conv1_2),
                  vgg.pool1,
                  Layer(vgg.conv2_1)])]
+
 subnets += [Net([Layer(vgg.conv2_2),
                  vgg.pool2,
                  Layer(vgg.conv3_1)])]
+
 subnets += [Net([Layer(vgg.conv3_2),
                  Layer(vgg.conv3_3),
                  Layer(vgg.conv3_4),
                  vgg.pool3,
                  Layer(vgg.conv4_1)])]
+
 subnets += [Net([Layer(vgg.conv4_2),
                  Layer(vgg.conv4_3),
                  Layer(vgg.conv4_4),
@@ -112,18 +116,20 @@ subnets += [Net([Layer(vgg.conv4_2),
 for L in range(5,0,-1):
     print("L = {0}".format(L))
     
-    # NNF search
+    # Upsampling the NNF
     if config['upsampling_ON'][L]:
         print('Upsampling ON')
-        initialNNF_ab = DeepReconstruction.upsample(NNFs_ab[L+1], FeatureMaps_A1[L].size()[-1], mode="nearest")
-        initialNNF_ba = DeepReconstruction.upsample(NNFs_ba[L+1], FeatureMaps_A1[L].size()[-1], mode="nearest")
+        featureMapSize = FeatureMaps_A1[L].size()[-1]
+        # For the current layer, NNF is initialized to upsampled version of the resulting NNF of the previous layer
+        initialNNF_ab = DeepReconstruction.upsample(NNFs_ab[L+1], size=featureMapSize, mode="nearest")
+        initialNNF_ba = DeepReconstruction.upsample(NNFs_ba[L+1], size=featureMapSize, mode="nearest")
     
     else:
         print('Upsampling OFF')
         initialNNF_ab = None
         initialNNF_ba = None
         
-        
+    # NNF Search
     NNFs_ab[L] = DeepPatchMatch.computeNNF(FeatureMaps_A1[L], FeatureMaps_B2[L], 
                                            FeatureMaps_A2[L], FeatureMaps_B1[L], 
                                            L, config, initialNNF=initialNNF_ab)
@@ -135,15 +141,31 @@ for L in range(5,0,-1):
     if L > 1:
         # Reconstruction for A2
         Warped_FeatureMaps_A2 = DeepPatchMatch.warp(FeatureMaps_B1[L], NNFs_ab[L])
-        R_A2[L-1] = DeepReconstruction.deconv(net=subnets[L-1], target=Warped_FeatureMaps_A2, 
-                                                  source=FeatureMaps_B1[L-1], loss=config['loss_fct'], value=None, max_iter=config['n_iter_deconv'])
-        FeatureMaps_A2[L-1] = DeepReconstruction.blend(FeatureMaps_A1[L-1], R_A2[L-1], DeepReconstruction.get_weight_map(FeatureMaps_A1[L-1], config["alphas"][L-1]))
+        
+        R_A2[L-1] = DeepReconstruction.deconv(subnet=subnets[L-1], 
+                                              target=Warped_FeatureMaps_A2, 
+                                              source_size=FeatureMaps_A1[L-1].data.size(),
+                                              source_type=FeatureMaps_A1[L-1].data.type(), 
+                                              loss=config['loss_fct'], 
+                                              max_iter=config['n_iter_deconv'])
+        
+        W_A1 = DeepReconstruction.get_weight_map(FeatureMaps_A1[L-1], config["alphas"][L-1])
+
+        FeatureMaps_A2[L-1] = DeepReconstruction.blend(FeatureMaps_A1[L-1], R_A2[L-1], W_A1)
 
         # Reconstruction for B2
         Warped_FeatureMaps_B2 = DeepPatchMatch.warp(FeatureMaps_A1[L], NNFs_ba[L])
-        R_B2[L-1] = DeepReconstruction.deconv(net=subnets[L-1], target=Warped_FeatureMaps_B2, 
-                                                  source=FeatureMaps_B1[L-1], loss=config['loss_fct'], value=None, max_iter=config['n_iter_deconv'])
-        FeatureMaps_B2[L-1] = DeepReconstruction.blend(FeatureMaps_B1[L-1], R_B2[L-1], DeepReconstruction.get_weight_map(FeatureMaps_B1[L-1], config["alphas"][L-1]))
+
+        R_B2[L-1] = DeepReconstruction.deconv(subnet=subnets[L-1], 
+                                              target=Warped_FeatureMaps_B2, 
+                                              source_size=FeatureMaps_B1[L-1].data.size(),
+                                              source_type=FeatureMaps_B1[L-1].data.type(), 
+                                              loss=config['loss_fct'], 
+                                              max_iter=config['n_iter_deconv'])
+        
+        W_B1 = DeepReconstruction.get_weight_map(FeatureMaps_B1[L-1], config["alphas"][L-1])
+
+        FeatureMaps_B2[L-1] = DeepReconstruction.blend(FeatureMaps_B1[L-1], R_B2[L-1], W_B1)
 
 print("\n--------\n--------\nOut of the main loop!")
 
