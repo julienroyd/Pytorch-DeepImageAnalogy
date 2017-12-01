@@ -175,25 +175,29 @@ def propagate(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, shift, config):
 
     return NNF_ab
 
-def random_search(A, B, px, py, nnf, half_patch, search_radius=200, reduce_ratio=0.5):
+def random_search(A1, B1, A2, B2, px, py, nnf, half_patch, search_radius=200, reduce_ratio=0.5):
     
     # helper : compute distance
-    def fdist(A, B, px, py, qx, qy, s):
+    def fdist(A1, B1, A2, B2, px, py, qx, qy, s):
     
-        # extracts patches around pixels p in A and q in B
-        patch_p = Patch(A, py, px, s)
-        patch_q = Patch(B, qy, qx, s)
-
+        # extracts patches around pixel p in A1 and A2
+        A1_patch = Patch(A1,py,px,m)
+        A2_patch = Patch(A2,py,px,m)
+        
+        # extracts patches around pixel q in A1 and A2
+        B1_patch = Patch(B1, qy, qx, s)
+        B2_patch = Patch(B2, qy, qx, s)
+        
         # compute distance (here euclidean)
-        dist = euclideanDistance(patch_p, patch_q)
+        dist = distance(A1_patch, B1_patch, A2_patch, B2_patch, mode=config['distance_mode'])
 
         return dist
     
     # padding = half patch size
-    pad = int( (config['patch_size'] - 1) / 2 )
+    pad = half_patch
     
     # size over dimensions of interest (height, width)
-    h, w = A.size()[-2:]
+    h, w = A1.size()[-2:]
     
     # initial search radius
     rad = search_radius
@@ -204,7 +208,7 @@ def random_search(A, B, px, py, nnf, half_patch, search_radius=200, reduce_ratio
     y_match, x_match = nnf[:, py, px].numpy()
     
     # distance to current best match
-    dist_match = fdist(A, B, px, py, x_match, y_match, half_patch)
+    dist_match = fdist(A1, B1, A2, B2, px, py, x_match, y_match, half_patch)
     
     
     while (rad >= 1):
@@ -217,7 +221,7 @@ def random_search(A, B, px, py, nnf, half_patch, search_radius=200, reduce_ratio
         rx, ry = np.random.randint(x_min, x_max), np.random.randint(y_min, y_max)
         
         # compute distance to sample
-        rdist = fdist(A, B, px, py, rx, ry, half_patch)
+        rdist = fdist(A1, B1, A2, B2, px, py, rx, ry, half_patch)
         
         if rdist < dist_match:
             x_match, y_match, dist_match = rx, ry, rdist
@@ -230,7 +234,7 @@ def random_search(A, B, px, py, nnf, half_patch, search_radius=200, reduce_ratio
     
     return nnf
 
-def randomSearch(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, L, config):
+def randomSearch(A1, B1, A2, B2, h, w, m, NNF_ab, i, j, L, config):
 
     max_step = config['random_search_max_step'][L]
 
@@ -329,7 +333,7 @@ def computeNNF(A1, B2, A2, B1, L, config, initialNNF=None):
             if (i+1)%100 == 0 : print("Row : {0}".format(i+1))
             for j in j_range:
                 NNF_ab = propagate(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, shift, config)
-                NNF_ab = random_search(A=A, B=B, px=j, py=i, half_patch=m, nnf=NNF_ab, search_radius=200) #randomSearch(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, L, config)
+                NNF_ab = random_search(A1, B1, A2, B2, px=j, py=i, half_patch=m, nnf=NNF_ab, search_radius=200) #randomSearch(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, L, config)
     
     NNF_final = NNF_ab[:, m:-m, m:-m]
     NNF_final -= m
