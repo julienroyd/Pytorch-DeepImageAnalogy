@@ -175,6 +175,60 @@ def propagate(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, shift, config):
 
     return NNF_ab
 
+def random_search(A, B, px, py, nnf, half_patch, search_radius=200, reduce_ratio=0.5):
+    
+    # helper : compute distance
+    def fdist(A, B, px, py, qx, qy, s):
+    
+        # extracts patches around pixels p in A and q in B
+        patch_p = Patch(A, py, px, s)
+        patch_q = Patch(B, qy, qx, s)
+
+        # compute distance (here euclidean)
+        dist = euclideanDistance(patch_p, patch_q)
+
+        return dist
+    
+    # padding = half patch size
+    pad = int( (config['patch_size'] - 1) / 2 )
+    
+    # size over dimensions of interest (height, width)
+    h, w = A.size()[-2:]
+    
+    # initial search radius
+    rad = search_radius
+    
+    # get coordinates of current best match
+    # x: position along the width
+    # y: position along the height
+    y_match, x_match = nnf[:, py, px].numpy()
+    
+    # distance to current best match
+    dist_match = fdist(A, B, px, py, x_match, y_match, half_patch)
+    
+    
+    while (rad >= 1):
+        
+        # compute a valid search window
+        x_min, y_min = max(x_match - rad, pad), max(y_match - rad, pad)
+        x_max, y_max = min(x_match + rad, w-pad), min(y_match + rad, h-pad)
+        
+        # randomly sample a shift
+        rx, ry = np.random.randint(x_min, x_max), np.random.randint(y_min, y_max)
+        
+        # compute distance to sample
+        rdist = fdist(A, B, px, py, rx, ry, half_patch)
+        
+        if rdist < dist_match:
+            x_match, y_match, dist_match = rx, ry, rdist
+        
+        # reduce search radius
+        rad = np.floor(reduce_ratio * rad)
+        
+    # update nnf
+    nnf[:, py, px] = torch.from_numpy(np.array([y_match, x_match]))
+    
+    return nnf
 
 def randomSearch(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, L, config):
 
@@ -275,7 +329,7 @@ def computeNNF(A1, B2, A2, B1, L, config, initialNNF=None):
             if (i+1)%100 == 0 : print("Row : {0}".format(i+1))
             for j in j_range:
                 NNF_ab = propagate(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, shift, config)
-                NNF_ab = randomSearch(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, L, config)
+                NNF_ab = random_search(A=A, B=B, px=j, py=i, half_patch=m, nnf=NNF_ab, search_radius=200) #randomSearch(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, L, config)
     
     NNF_final = NNF_ab[:, m:-m, m:-m]
     NNF_final -= m
