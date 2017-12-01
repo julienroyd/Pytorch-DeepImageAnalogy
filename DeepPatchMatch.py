@@ -333,7 +333,7 @@ def computeNNF(A1, B2, A2, B1, L, config, initialNNF=None):
             if (i+1)%100 == 0 : print("Row : {0}".format(i+1))
             for j in j_range:
                 NNF_ab = propagate(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, shift, config)
-                NNF_ab = random_search(A1, B1, A2, B2, px=j, py=i, half_patch=m, nnf=NNF_ab, search_radius=200) #randomSearch(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, L, config)
+                NNF_ab = random_search(A1, B1, A2, B2, px=j, py=i, half_patch=m, nnf=NNF_ab, search_radius=config["search_max_step"][L]) #randomSearch(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, L, config)
     
     NNF_final = NNF_ab[:, m:-m, m:-m]
     NNF_final -= m
