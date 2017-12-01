@@ -181,8 +181,8 @@ def random_search(A1, B1, A2, B2, px, py, nnf, half_patch, search_radius=200, re
     def fdist(A1, B1, A2, B2, px, py, qx, qy, s):
     
         # extracts patches around pixel p in A1 and A2
-        A1_patch = Patch(A1,py,px,m)
-        A2_patch = Patch(A2,py,px,m)
+        A1_patch = Patch(A1, py, px, s)
+        A2_patch = Patch(A2, py, px, s)
         
         # extracts patches around pixel q in A1 and A2
         B1_patch = Patch(B1, qy, qx, s)
