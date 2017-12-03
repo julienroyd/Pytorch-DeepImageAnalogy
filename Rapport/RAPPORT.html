@@ -89,27 +89,56 @@ function renderLoading(figure) {
             
             <!-- SECTION ____________________________________________________________________________-->
             <h2>Background</h2>
-                <p> Blablabla</p>
+                <p> In this section, we briefly present the pre-requisite notions that are at the core of the Deep Image Analogy method.  </p>
 
             <h3>Randomized Patch-Match algorithm</h3>
-                <p> Blablabla</p>
+                <p class="toRender"> 
+                    Patch matching refers to the problem of finding the nearest neighbor patch in an image <i>B</i> to a source patch in an image <i>A</i>. The result of this process is a mapping function $\phi_{ab}$, also called Nearest-Neighbor Field (NNF) that is the same size of image <i>A</i>, and defines for each pixel of <i>A</i> where is the nearest patch in <i>B</i>. The patches are usually extended to all the channels of an image, so for a 3 channels RGB image, a 3x3 patch would in fact refer to a 3x3x3 tensor. Different similarity metrics can be used to define the nearest patch may be used, a simple one being the squared Euclidean distance : 
+
+                    $$ d(P^{(A)}, P^{(B)}) = \sum_{i,j,k} (P^{(A)}_{i,j,k} - P^{(B)}_{i,j,k})^{2}$$ 
+                </p>
+                <p>
+                    The main challenge is the number of patches to compare with each other, which grows exponentially with the size of the images. Luckily, the Randomized approach to PatchMatch <dt-cite key="barnes2010"></dt-cite> allows to find very good estimate solutions in a much shorter amount of time. The strategy is simple, the NNF is initialized randomly. Then, for each pixels, we execute the two following steps : propagation and random search. Propagation refers to looking at the pixel's neighbors to see if they could find a better match than it's own. Random search consists in randomly selecting potential match candidates in a certain area, and see if they offer a better match than the current one. Those steps are illustrated in the next figure.
+                    
+                    <figure>
+                        <center><img class="image" src="images/patch_match.png" height="400px"></center>
+                    <figcaption style="text-align: center;">Randomized Patch-Match illustrated as a 3-step process (Figure from :<dt-cite key="barnes2010"></dt-cite>)</figcaption>
+                    </figure>
+                </p>
+                <p>
+                    This approach depends on the reasonable assumption that natural images are usually spatially smooth. That means that small sub-regions of the image will usually have similar colors, so successive patches in image <i>A</i> might want to share the same correspondances in image <i>B</i> (propagation step) and that randomly sampling patches to compare with that come from different sub-regions counts as an efficient scan of the image in order to find a good neighborhood (random search step). When the PatchMatch is successful, one can express image <i>A</i> only in terms of pixels in image <i>B</i>, a process shown in the next figure. This resulting hybrid image is called a <i>warp</i>.
+                    <figure>
+                        <center><img class="image" src="images/warp.png"></center>
+                    </figure>
+                </p>
 
             <h3>Semantical features in deep CNNs</h3>
-                <p> Blablabla</p>
+                <p> DAVID-DAVID-DAVID</p>
 
             <hr> <!--Separation line-->
             <!-- SECTION ____________________________________________________________________________-->
             <h2>Algorithm</h2> 
-                <p> Blablabla</p>
+                <p class="toRender"> 
+                    The algorithm has been designed to perform style transfer on two images, while respecting the semantic correspondances between them. Given two reference images <i>A1</i> and <i>B1</i>, it produces two mapping functions $\phi_{ab}$ and $\phi_{ba}$ that allow to warp the references into two new images <i>A2</i> and <i>B2</i> that mix the style and the content of the references. An overview of the algorithm is presented on the following figure.
+                </p>
+                <figure>
+                    <center><img class="image" src="images/overview.png"></center>
+                <figcaption style="text-align: center;">Overview of Deep Image Analogy (Figure from :<dt-cite key="liao2017"></dt-cite>)</figcaption>
+                <p class="toRender"> 
+                    Broadly, the process aims to reconstruct every deep feature maps of the two latent images, starting at the fifth layer and working its way back to the first layer of VGG. Therefore, before starting this process, the two reference images are fed to the network and their deep features are saved. The feature maps of the two latent images at the deepest layer (L=5) are initialized to the same values as the reference images (more specifically, $F^{(5)}_{A2}$ is initialized with $F^{(5)}_{A1}$ and $F^{(5)}_{B2}$ is initialized with $F^{(5)}_{B1}$). Then, for each layer $L$, an NNF-search (Deep PatchMatch) is performed to discover the mapping functions $\phi^{(L)}_{ab}$ and $\phi^{(L)}_{ba}$, followed by an optimization phase (Deep Reconstruction) that aims to reconstruct the feature maps $F^{(L-1)}_{A2}$ and $F^{(L-1)}_{B2}$ of the latent images at layer $L-1$. The Deep PatchMatch and Deep Reconstruction phases are explained in more details in the next sections.
+                </p>
 
-            <h3>Deep Patch-Match</h3>
-                <p> Blablabla</p>
+            <h3>Deep PatchMatch</h3>
+                <p> One key element of the method is that the PatchMatch is applied to find correspondances between the deep features of the reference and latent images. Applying this technique at such a deep level of image features allows to map semantic elements of both images to one another. The next figure shows how the eyes of the two reference images are very similarly represented at that depth. </p>
+                <figure>
+                    <center><img class="image" src="images/semantic_correspondances.png"></center>
+                <figcaption style="text-align: center;">Both faces, very dissimilar at the pixel level, are now represented in very similar ways at the 5th layer. (Images from <dt-cite key="liao2017"></dt-cite>)</figcaption>
 
-            <h3>Spatial constraint over Patch-Match</h3>
-                <p> Blablabla</p>
+            <h3>Deep Reconstruction</h3>
+                <p> DAVID-DAVID-DAVID</p>
 
-            <h3>Reconstruction step</h3>
-                <p> Blablabla</p>
+            <h3>Implementation details</h3>
+                <p> Our implementation of Deep Image Analogy is in Python, and uses the deep learning framework pytorch for manipulating tensors and easily use and compare optimization algorithms. The PatchMatch steps, being highly dependant on intricated loops are processed on CPU. The reconstruction phase formulated as an optimization problem is computed on GPU. We use the squared Euclidean distance for similarity metric between deep patches.</p>
 
 
             <hr> <!--Separation line-->
@@ -210,7 +239,7 @@ function renderLoading(figure) {
         <dt-appendix class="centered">
             </dt-appendix>
             <h3>Acknowledgments</h3>
-                <p>We would like to thank...</p>
+                <p>Thank you to Pr. Christopher Pal for allowing us to use GPUs from his server to perform our experiments.</p>
         
         <script type="text/javascript">
         var el = document.getElementsByClassName("toRender")
