@@ -129,10 +129,19 @@ function renderLoading(figure) {
                 </p>
 
             <h3>Deep PatchMatch</h3>
-                <p> One key element of the method is that the PatchMatch is applied to find correspondances between the deep features of the reference and latent images. Applying this technique at such a deep level of image features allows to map semantic elements of both images to one another. The next figure shows how the eyes of the two reference images are very similarly represented at that depth. </p>
+                <p> 
+                    One key element of the method is that the PatchMatch is applied to find correspondances between the deep features of the reference and latent images. Applying this technique at such a deep level of image features allows to map semantic elements of both images to one another. The next figure shows how the eyes of the two reference images are very similarly represented at that depth. 
+                </p>
                 <figure>
                     <center><img class="image" src="images/semantic_correspondances.png"></center>
                 <figcaption style="text-align: center;">Both faces, very dissimilar at the pixel level, are now represented in very similar ways at the 5th layer. (Images from <dt-cite key="liao2017"></dt-cite>)</figcaption>
+                <p class="toRender">
+                    Another key element is that the random search in deep patch match is locally constrained. The mapping function for the fifth layer is randomly initialized and has access to the whole image in the random search phase in order to find the best possible matches for each semantic attributes. However, the mapping functions for $L \in \{1,2,3,4\}$ are initilized with an upsampled version of the previous layer, and their random search only has access to a small centered at the current best match, making it impossible to completely destroy the mapping that had been established in previous layers. Therefore, the correspondances found at the deepest layers serve as the foundation upon which the next mapping functions are built, and those shallower layers mapping only are fine-tuned versions of the deeper ones. This fine-tuning effect is illustrated in the following figure.
+                </p>
+              <figure>
+                    <center><img class="image" src="images/spatial_constraint.png"></center>
+                <figcaption style="text-align: center;">The fifth layer finds the semantic correspondances. This mapping is then fine-tuned to fit smaller details and textures as the process takes us to shallower and shallower layers.</figcaption>
+
 
             <h3>Deep Reconstruction</h3>
                 <p> DAVID-DAVID-DAVID</p>
