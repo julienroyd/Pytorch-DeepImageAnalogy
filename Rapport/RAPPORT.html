@@ -68,7 +68,7 @@ function renderLoading(figure) {
 
 
     </head><body>
-        <dt-article class="left">
+        <dt-article class="left" style="text-align: justify">
             <h1>Deep Image Analogy</h1>
             <h2>A Semantically Consistent Approach to Neural Style Transfer</h2>
             <dt-byline></dt-byline>
@@ -98,7 +98,7 @@ function renderLoading(figure) {
                     $$ d(P^{(A)}, P^{(B)}) = \sum_{i,j,k} (P^{(A)}_{i,j,k} - P^{(B)}_{i,j,k})^{2}$$
                 </p>
                 <p>
-                    The main challenge is the number of patches to compare with each other, which grows exponentially with the size of the images. Luckily, the Randomized approach to PatchMatch <dt-cite key="barnes2010"></dt-cite> allows to find very good estimate solutions in a much shorter amount of time. The strategy is simple, the NNF is initialized randomly. Then, for each pixels, we execute the two following steps : propagation and random search. Propagation refers to looking at the pixel's neighbors to see if they could find a better match than it's own. Random search consists in randomly selecting potential match candidates in a certain area, and see if they offer a better match than the current one. Those steps are illustrated in the next figure.
+                    The main challenge is the number of patches to compare with each other, which grows exponentially with the size of the images. Luckily, the Randomized approach to PatchMatch <dt-cite key="barnes2010"></dt-cite> allows to find very good estimate solutions in a much shorter amount of time. The strategy is simple, the NNF is initialized randomly. Then, for each pixels, we execute two steps : propagation and random search. Propagation refers to looking at the pixel's neighbors to see if they could find a better match than it's own. Random search consists in randomly selecting potential match candidates in a certain area, and see if they offer a better match than the current one. Those steps are illustrated in the next figure.
 
                     <figure>
                         <center><img class="image" src="images/patch_match.png" height="400px"></center>
@@ -134,7 +134,7 @@ function renderLoading(figure) {
                 </figure>
                 <p class="toRender">
                   We use a pretrained instance of the VGG-19 architecture to build and extract feature maps. Since the network is not used for classification purposes, we can get rid of the fully connected layers, and only work with the convolutional blocks of VGG.
-                  We do not retreive every feature map at every layer's output, but only the ones produced by the first layer of convolutional blocks (the output of the $reluL\_1$).
+                  We do not retrieve every feature map at every layer's output, but only the ones produced by the first layer of convolutional blocks (the output of the $reluL\_1$).
                 </p>
                 <figure id="" style="padding:5px 5px 0px 0px">
                   <center style="position:relative; top:-35px">
