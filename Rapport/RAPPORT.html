@@ -80,10 +80,10 @@ function renderLoading(figure) {
                     The fact that humans can appreciate and differentiate style without quite agreeing on how to describe it (even less on how to formalize it) makes machine learning a promising approach for that problem.
                 </p>
                 <p>
-                    Gatys <i>et al.</i> developped the first algorithm that uses a deep convolutional neural network (CNN) to capture and modelize the style of an image. This technique is refered to as <i>Neural Style Transfer</i><dt-cite key="gatys2016"></dt-cite>. However, while being able to produce impressive results, this approach fails to carry out style transfer in a manner that preserves the semantic correspondances between the two original images. For example, the algorithm won't distinguish the difference between the background and the main objects of both scenes, and thus will apply the style in an homogenous manner to the generated image without any regard about where which part of the style should be applied.
+                    Gatys <i>et al.</i> developped the first algorithm that uses a deep convolutional neural network (CNN) to capture and modelize the style of an image. This technique is refered to as <dt-cite key="gatys2016">Neural Style Transfer</dt-cite>. However, while being able to produce impressive results, this approach fails to carry out style transfer in a manner that preserves the semantic correspondances between the two original images. For example, the algorithm won't distinguish the difference between the background and the main objects of both scenes, and thus will apply the style in an homogenous manner to the generated image without any regard about where which part of the style should be applied.
                 </p>
                 <p>
-                    Liao <i>et al.</i> solve that issue by introducing <i>Deep Image Analogy</i><dt-cite key="liao2017"></dt-cite></dt-cite>. This algorithm is inspired by the original Neural Style Transfer as it still uses a pretrained deep CNN to extract information about the images, but also cleverly apply the Patch Match method<dt-cite key="barnes2010"></dt-cite> on deep feature maps constructed by that CNN to take into account semantic correspondances between the two base images. Therefore, they iteratively progress in a coarse-to-fine manner (from the deeper to shallower representations) to generate the new latent image that both presents the style of one reference, and the content of another, in a semantically consistent fashion.
+                    Liao <i>et al.</i> solve that issue by introducing <dt-cite key="liao2017">Deep Image Analogy</dt-cite>. This algorithm is inspired by the original Neural Style Transfer as it still uses a pretrained deep CNN to extract information about the images, but also cleverly apply the Patch Match method<dt-cite key="barnes2010"></dt-cite> on deep feature maps constructed by that CNN to take into account semantic correspondances between the two base images. Therefore, they iteratively progress in a coarse-to-fine manner (from the deeper to shallower representations) to generate the new latent image that both presents the style of one reference, and the content of another, in a semantically consistent fashion.
                 </p>
                 <hr> <!--Separation line-->
 
@@ -115,29 +115,30 @@ function renderLoading(figure) {
             <h3>Semantical features in deep CNNs</h3>
                 <!-- here give some background info on deep CNNs used in image recognition tasks and VGG trained for classification and recently used for style Transfer -->
                 <p class="toRender">
-                  VGG-19 is a deep convolutional neural network architecture trained on the ImageNet data set for image classification/recognition tasks. It consists in 5 convolutional blocks (made of 2, 2, 4, 4 and 4 layers respectively) supplemented with a 2x2 pooling layer (max or average) each, and followed by a couple of fully connected layers.
+                  <dt-cite key="  SimonyanZ14a">VGG-19</dt-cite> is a deep convolutional neural network architecture trained on the ImageNet data set for image classification/recognition tasks. It consists in 5 convolutional blocks (made of 2, 2, 4, 4 and 4 layers respectively) supplemented with a 2x2 pooling layer (max or average) each, and followed by a couple of fully connected layers.
                   The convolutional blocks of VGG use spatial coherence in images to build higher representation of them with latent semantical information such as eyes and nose positions for faces, colours ...etc.
                   Each block builds a higher representation on top of the previous, extracting more and more semantics, which are later used in fully connected layers for classification.
                 </p>
                 <figure id="" style="padding:5px 5px 0px 0px">
-                  <div style="position:relative; top:-35px">
-                    <img class="image" src="images/vgg.png", style="height:300px; width:auto">
-                    <figcaption class="toRender" style="">
-                        Caption here
-                    </figcaption>
-                  </div>
+                  <center style="position:relative; top:-35px">
+                    <img class="image" src="images/vgg.png" hight="400px">
+                  </center>
+                  <figcaption class="toRender" style="text-align: center;">
+                      Caption here
+                  </figcaption>
+
                 </figure>
                 <p>
                   We use a pretrained instance of the VGG-19 architecture to build and extract feature maps. Since the network is not used for classification purposes, we can get rid of the fully connected layers, and only work with the convolutional blocks of VGG.
                   We do not retreive every feature map at every layer's output, but only the ones produced by the first layer of convolutional blocks.
                 </p>
                 <figure id="" style="padding:5px 5px 0px 0px">
-                  <div style="position:relative; top:-35px">
-                    <img class="image" src="images/deep_features.png", style="height:300px; width:auto">
-                    <figcaption class="toRender" style="">
-                        Caption here
-                    </figcaption>
-                  </div>
+                  <center style="position:relative; top:-35px">
+                    <img class="image" src="images/deep_features.png" hight="400px">
+                  </center>
+                  <figcaption class="toRender" style="text-align: center;">
+                      Caption here
+                  </figcaption>
                 </figure>
 
             <hr> <!--Separation line-->
@@ -175,12 +176,12 @@ function renderLoading(figure) {
                   Here we explain each of them.
                 </p>
                 <figure id="" style="padding:5px 5px 0px 0px">
-                  <div style="position:relative; top:-35px">
-                    <img class="image" src="images/reconstruction.png", style="height:300px; width:auto">
-                    <figcaption class="toRender" style="">
-                        Caption here
-                    </figcaption>
-                  </div>
+                  <center style="position:relative; top:-35px">
+                    <img class="image" src="images/reconstruction.png" hight="400px">
+                  </center>
+                  <figcaption class="toRender" style="text-align: center;">
+                      Caption here
+                  </figcaption>
                 </figure>
                 <p class="toRender">
                   Provided we have $\phi^{L}_{a \to b}$ the nearest neihgbour field at layer $L$
@@ -321,6 +322,21 @@ function renderLoading(figure) {
   pages={29--43},
   year={2010},
   organization={Springer}
+}
+
+@article{SimonyanZ14a,
+  author    = {Karen Simonyan and
+               Andrew Zisserman},
+  title     = {Very Deep Convolutional Networks for Large-Scale Image Recognition},
+  journal   = {CoRR},
+  volume    = {abs/1409.1556},
+  year      = {2014},
+  url       = {http://arxiv.org/abs/1409.1556},
+  archivePrefix = {arXiv},
+  eprint    = {1409.1556},
+  timestamp = {Wed, 07 Jun 2017 14:41:51 +0200},
+  biburl    = {http://dblp.org/rec/bib/journals/corr/SimonyanZ14a},
+  bibsource = {dblp computer science bibliography, http://dblp.org}
 }
 
 @inproceedings{pouli2010,
