@@ -115,8 +115,12 @@ function renderLoading(figure) {
             <h3>Semantical features in deep CNNs</h3>
                 <!-- here give some background info on deep CNNs used in image recognition tasks and VGG trained for classification and recently used for style Transfer -->
                 <p class="toRender">
-                  <dt-cite key="  SimonyanZ14a">VGG-19</dt-cite> is a deep convolutional neural network architecture trained on the ImageNet data set for image classification/recognition tasks. It consists in 5 convolutional blocks (made of 2, 2, 4, 4 and 4 layers respectively) supplemented with a 2x2 pooling layer (max or average) each, and followed by a couple of fully connected layers.
-                  The convolutional blocks of VGG use spatial coherence in images to build higher representation of them with latent semantical information such as eyes and nose positions for faces, colours ...etc.
+                  Despite the fact that <i>PacthMatch</i> performs well at matching two images such that one can be recovered through warping the other using the correcpondant nearest neighbour field, it operates at a very shallow level, on raw pixel only. It does not take into account of the semantic information present within the provided images.
+                </p>
+                <p class="toRender">
+                  <dt-cite key="SimonyanZ14a">VGG-19</dt-cite> is a deep convolutional neural network architecture which have been trained and evaluated on the ImageNet data set for image classification/recognition tasks, which it has been shown to perform very well at. VGG has also been used for the <dt-cite key="gatys2016">style transfer task</dt-cite> with success.
+                  It consists of 5 convolutional blocks (made of 2, 2, 4, 4 and 4 layers respectively) supplemented with a $2\times2$ pooling layer (max or average) each, and followed by a couple of fully connected layers.
+                  The convolutional blocks of VGG use spatial coherence in images to build higher representations that do expose latent semantical information (such as eyes and nose positions for faces, colours ...etc).
                   Each block builds a higher representation on top of the previous, extracting more and more semantics, which are later used in fully connected layers for classification.
                 </p>
                 <figure id="" style="padding:5px 5px 0px 0px">
@@ -124,20 +128,20 @@ function renderLoading(figure) {
                     <img class="image" src="images/vgg.png" hight="400px">
                   </center>
                   <figcaption class="toRender" style="text-align: center;">
-                      Caption here
+                      An illustration of the VGG deep neural architecture.
                   </figcaption>
 
                 </figure>
-                <p>
+                <p class="toRender">
                   We use a pretrained instance of the VGG-19 architecture to build and extract feature maps. Since the network is not used for classification purposes, we can get rid of the fully connected layers, and only work with the convolutional blocks of VGG.
-                  We do not retreive every feature map at every layer's output, but only the ones produced by the first layer of convolutional blocks.
+                  We do not retreive every feature map at every layer's output, but only the ones produced by the first layer of convolutional blocks (the output of the $reluL\_1$).
                 </p>
                 <figure id="" style="padding:5px 5px 0px 0px">
                   <center style="position:relative; top:-35px">
                     <img class="image" src="images/deep_features.png" hight="400px">
                   </center>
                   <figcaption class="toRender" style="text-align: center;">
-                      Caption here
+                      An illustration of feature maps $F^L, \forall L \in \lbrace 1, 2, ..., 5\rbrace$ extracted with the <dt-cite key="SimonyanZ14a">VGG-19</dt-cite> architecture.
                   </figcaption>
                 </figure>
 
