@@ -177,7 +177,7 @@
                     <figcaption style="text-align: center;">Overview of Deep Image Analogy (Figure from :<dt-cite key="liao2017"></dt-cite>)</figcaption>
                 </figure>
                 <p class="toRender">
-                    Broadly, the process aims to reconstruct every deep feature maps of the two latent images, starting at the fifth layer and working its way back to the first layer of VGG. Therefore, before starting this process, the two reference images are fed to the network and their deep features are saved. The feature maps of the two latent images at the deepest layer (L=5) are initialized to the same values as the reference images (more specifically, $F^{(5)}_{A2}$ is initialized with $F^{(5)}_{A1}$ and $F^{(5)}_{B2}$ is initialized with $F^{(5)}_{B1}$). Then, for each layer $L$, an NNF-search (Deep PatchMatch) is performed to discover the mapping functions $\phi^{(L)}_{ab}$ and $\phi^{(L)}_{ba}$, followed by an optimization phase (Deep Reconstruction) that aims to reconstruct the feature maps $F^{(L-1)}_{A2}$ and $F^{(L-1)}_{B2}$ of the latent images at layer $L-1$. The Deep PatchMatch and Deep Reconstruction phases are explained in more details in the next sections.
+                    Broadly, the process aims to reconstruct every deep feature maps of the two latent images, starting at the fifth layer and working its way back to the first layer of VGG. Therefore, before starting this process, the two reference images are fed to the network and their deep features are saved. The feature maps of the two latent images at the deepest layer ($L=5$) are initialized to the same values as the reference images (more specifically, $F^{(5)}_{A2}$ is initialized with $F^{(5)}_{A1}$ and $F^{(5)}_{B2}$ is initialized with $F^{(5)}_{B1}$). Then, for each layer $L$, an NNF-search (Deep PatchMatch) is performed to discover the mapping functions $\phi^{(L)}_{ab}$ and $\phi^{(L)}_{ba}$, followed by an optimization phase (Deep Reconstruction) that aims to reconstruct the feature maps $F^{(L-1)}_{A2}$ and $F^{(L-1)}_{B2}$ of the latent images at layer $L-1$. The Deep PatchMatch and Deep Reconstruction phases are explained in more details in the next sections.
                 </p>
 
             <h3 class="sub-section-title">1. Deep PatchMatch</h3>
@@ -214,7 +214,7 @@
                   Provided we have $\phi^{L}_{a \to b}$ the nearest neihgbour field at layer $L$
                 </p>
 
-            <h3>Implementation details</h3>
+            <h3 class="sub-section-title">3. Implementation details</h3>
                 <p> Our implementation of Deep Image Analogy is in Python, and uses the deep learning framework pytorch for manipulating tensors and easily use and compare optimization algorithms. The PatchMatch steps, being highly dependant on intricated loops are processed on CPU. The reconstruction phase formulated as an optimization problem is computed on GPU. We use the squared Euclidean distance for similarity metric between deep patches.</p>
 
 
