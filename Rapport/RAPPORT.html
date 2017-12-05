@@ -1,104 +1,125 @@
-<!DOCTYPE html><html><head><meta charset="utf-8">
-<meta name="viewport" content="width=768, initial-scale=1">
-<script src="http://distill.pub/template.v1.js"></script>
-<script type="text/front-matter">
-  title: Deep Image Analogy
-  description: A Semantically Consistent Approach to Neural Style Transfer
-  authors:
-    - Julien Roy: https://github.com/julienroy13
-    - David Kanaa: https://github.com/davidkanaa
-  affiliations:
-      - Polytechnique Montreal: polymtl.ca
-      - Polytechnique Montreal: polymtl.ca
-</script>
-<!-- Katex -->
-<script src="assets/lib/auto-render.min.js"></script>
-<script src="assets/lib/katex.min.js"></script>
-<link rel="stylesheet" href="assets/lib/katex.min.css">
-<link rel="stylesheet" type="text/css" href="assets/widgets.css">
-<link rel="stylesheet" type="text/css" href="assets/main.css">
-<!-- Required -->
-<script src="assets/lib/lib.js"></script>
-<script src="assets/utils.js"></script>
-<script>
-var renderQueue = [];
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=768, initial-scale=1">
+        <script src="http://distill.pub/template.v1.js"></script>
+        <script type="text/front-matter">
+          title: Deep Image Analogy
+          description: A Semantically Consistent Approach to Neural Style Transfer
+          authors:
+            - Julien Roy: https://github.com/julienroy13
+            - David Kanaa: https://github.com/davidkanaa
+          affiliations:
+              - Polytechnique Montreal: polymtl.ca
+              - Polytechnique Montreal: polymtl.ca
+        </script>
+        <!-- Katex -->
+        <script src="assets/lib/auto-render.min.js"></script>
+        <script src="assets/lib/katex.min.js"></script>
+        <link rel="stylesheet" href="assets/lib/katex.min.css">
+        <link rel="stylesheet" type="text/css" href="assets/widgets.css">
+        <link rel="stylesheet" type="text/css" href="assets/main.css">
 
-function renderMath(elem) {
-    renderMathInElement(
-        elem, {
-            delimiters: [{
-                left: "$$",
-                right: "$$",
-                display: true
-            }, {
-                left: "$",
-                right: "$",
-                display: false
-            }, ]
+        <!-- custom -->
+        <link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/dreampulse/computer-modern-web-font/master/fonts.css">
+
+        <!-- Required -->
+        <script src="assets/lib/lib.js"></script>
+        <script src="assets/utils.js"></script>
+        <script>
+        var renderQueue = [];
+
+        function renderMath(elem) {
+            renderMathInElement(
+                elem, {
+                    delimiters: [{
+                        left: "$$",
+                        right: "$$",
+                        display: true
+                    }, {
+                        left: "$",
+                        right: "$",
+                        display: false
+                    }, ]
+                }
+            );
         }
-    );
-}
 
-var deleteQueue = [];
+        var deleteQueue = [];
 
-function renderLoading(figure) {
-    var loadingScreen = figure.append("svg")
-        .style("width", figure.style("width"))
-        .style("height", figure.style("height"))
-        .style("position", "absolute")
-        .style("top", "0px")
-        .style("left", "0px")
-        .style("background", "white")
-        .style("border", "0px dashed #DDD")
-        .style("opacity", 1)
+        function renderLoading(figure) {
+            var loadingScreen = figure.append("svg")
+                .style("width", figure.style("width"))
+                .style("height", figure.style("height"))
+                .style("position", "absolute")
+                .style("top", "0px")
+                .style("left", "0px")
+                .style("background", "white")
+                .style("border", "0px dashed #DDD")
+                .style("opacity", 1)
 
-    return function(callback) {
-        loadingScreen
-            .remove()
-    }
+            return function(callback) {
+                loadingScreen
+                    .remove()
+            }
 
-}
-</script>
+        }
+        </script>
 
-<style>
-#previews figcaption {
-  text-align: center;
-}
-</style>
+        <style>
 
+        #previews figcaption {
+          text-align: center;
+        }
 
-    </head><body>
-        <dt-article class="left" style="text-align: justify">
+        .tex, .tex > * {
+          font-family: "Computer Modern Serif", serif;
+        }
+
+        p, p > * {
+          text-align: justify;
+        }
+
+        .section-title, .sub-section-title {
+          font-weight: bold;
+        }
+
+        </style>
+
+    </head>
+    <body>
+        <dt-article class="left tex">
             <h1>Deep Image Analogy</h1>
             <h2>A Semantically Consistent Approach to Neural Style Transfer</h2>
             <dt-byline></dt-byline>
 
-                <p>
+                <p class="tex">
                     Image style transfer refers to the problem of transforming an image in such a way that it acquires the stylistic attributes of a reference image, while preserving its content information. For instance, color editing with respect to a reference image can be achieved by matching the target and the reference color histograms <dt-cite key="pouli2010"></dt-cite>. However, even if defining a complete definition of <i>style</i> would be difficult, most would agree that the stylistic attributes account for more than simply color. Some of these attributes however might be hard to describe or identify -- the style of a painting could lie in the brush strokes and the textures, the style of a photograph is partly defined by the lighting and tone nuances.
                 </p>
-                <p>
+                <p class="tex">
                     The fact that humans can appreciate and differentiate style without quite agreeing on how to describe it (even less on how to formalize it) makes machine learning a promising approach for that problem.
                 </p>
-                <p>
+                <p class="tex">
                     Gatys <i>et al.</i> developped the first algorithm that uses a deep convolutional neural network (CNN) to capture and modelize the style of an image. This technique is refered to as <dt-cite key="gatys2016">Neural Style Transfer</dt-cite>. However, while being able to produce impressive results, this approach fails to carry out style transfer in a manner that preserves the semantic correspondances between the two original images. For example, the algorithm won't distinguish the difference between the background and the main objects of both scenes, and thus will apply the style in an homogenous manner to the generated image without any regard about where which part of the style should be applied.
                 </p>
-                <p>
+                <p class="tex">
                     Liao <i>et al.</i> solve that issue by introducing <dt-cite key="liao2017">Deep Image Analogy</dt-cite>. This algorithm is inspired by the original Neural Style Transfer as it still uses a pretrained deep CNN to extract information about the images, but also cleverly apply the Patch Match method<dt-cite key="barnes2010"></dt-cite> on deep feature maps constructed by that CNN to take into account semantic correspondances between the two base images. Therefore, they iteratively progress in a coarse-to-fine manner (from the deeper to shallower representations) to generate the new latent image that both presents the style of one reference, and the content of another, in a semantically consistent fashion.
                 </p>
                 <hr> <!--Separation line-->
 
             <!-- SECTION ____________________________________________________________________________-->
-            <h2>Background</h2>
+            <h2 class="section-title">Background</h2>
                 <p> In this section, we briefly present the pre-requisite notions that are at the core of the Deep Image Analogy method.  </p>
 
-            <h3>Randomized Patch-Match algorithm</h3>
+            <h3 class="sub-section-title">1. Randomized Patch-Match algorithm</h3>
                 <p class="toRender">
-                    Patch matching refers to the problem of finding the nearest neighbor patch in an image <i>B</i> to a source patch in an image <i>A</i>. The result of this process is a mapping function $\phi_{ab}$, also called Nearest-Neighbor Field (NNF) that is the same size of image <i>A</i>, and defines for each pixel of <i>A</i> where is the nearest patch in <i>B</i>. The patches are usually extended to all the channels of an image, so for a 3 channels RGB image, a 3x3 patch would in fact refer to a 3x3x3 tensor. Different similarity metrics can be used to define the nearest patch may be used, a simple one being the squared Euclidean distance :
+                    Patch matching refers to the problem of finding the nearest neighbor patch in an image <i>B</i> to a source patch in an image <i>A</i>. The result of this process is a mapping function $\phi_{ab}$, also called Nearest-Neighbor Field (NNF) that is the same size of image <i>A</i>, and defines for each pixel of <i>A</i> where is the nearest patch in <i>B</i>. The patches are usually extended to all the channels of an image, so for a 3 channels RGB image, a $3\times3$ patch would in fact refer to a $3\times3\times3$ tensor. Different similarity metrics can be used to define the nearest patch may be used, a simple one being the squared Euclidean distance :
 
                     $$ d(P^{(A)}, P^{(B)}) = \sum_{i,j,k} (P^{(A)}_{i,j,k} - P^{(B)}_{i,j,k})^{2}$$
                 </p>
                 <p>
-                    The main challenge is the number of patches to compare with each other, which grows exponentially with the size of the images. Luckily, the Randomized approach to PatchMatch <dt-cite key="barnes2010"></dt-cite> allows to find very good estimate solutions in a much shorter amount of time. The strategy is simple, the NNF is initialized randomly. Then, for each pixels, we execute two steps : propagation and random search. Propagation refers to looking at the pixel's neighbors to see if they could find a better match than it's own. Random search consists in randomly selecting potential match candidates in a certain area, and see if they offer a better match than the current one. Those steps are illustrated in the next figure.
+                    The main challenge is the number of patches to compare with each other, which grows exponentially with the size of the images. Luckily, the Randomized approach to <dt-cite key="barnes2010">PatchMatch</dt-cite> allows to find very good estimate solutions in a much shorter amount of time. The strategy is simple, the NNF is initialized randomly. Then, for each pixels, we execute two steps : propagation and random search. Propagation refers to looking at the pixel's neighbors to see if they could find a better match than it's own. Random search consists in randomly selecting potential match candidates in a certain area, and see if they offer a better match than the current one. Those steps are illustrated in the next figure.
 
                     <figure>
                         <center><img class="image" src="images/patch_match.png" height="400px"></center>
@@ -112,7 +133,7 @@ function renderLoading(figure) {
                     </figure>
                 </p>
 
-            <h3>Semantical features in deep CNNs</h3>
+            <h3 class="sub-section-title">2. Semantical features in deep CNNs</h3>
                 <!-- here give some background info on deep CNNs used in image recognition tasks and VGG trained for classification and recently used for style Transfer -->
                 <p class="toRender">
                   Despite the fact that <i>PacthMatch</i> performs well at matching two images such that one can be recovered through warping the other using the correcpondant nearest neighbour field, it operates at a very shallow level, on raw pixel only. It does not take into account of the semantic information present within the provided images.
@@ -147,33 +168,35 @@ function renderLoading(figure) {
 
             <hr> <!--Separation line-->
             <!-- SECTION ____________________________________________________________________________-->
-            <h2>Algorithm</h2>
+            <h2 class="section-title">Algorithm</h2>
                 <p class="toRender">
                     The algorithm has been designed to perform style transfer on two images, while respecting the semantic correspondances between them. Given two reference images <i>A1</i> and <i>B1</i>, it produces two mapping functions $\phi_{ab}$ and $\phi_{ba}$ that allow to warp the references into two new images <i>A2</i> and <i>B2</i> that mix the style and the content of the references. An overview of the algorithm is presented on the following figure.
                 </p>
                 <figure>
                     <center><img class="image" src="images/overview.png"></center>
-                <figcaption style="text-align: center;">Overview of Deep Image Analogy (Figure from :<dt-cite key="liao2017"></dt-cite>)</figcaption>
+                    <figcaption style="text-align: center;">Overview of Deep Image Analogy (Figure from :<dt-cite key="liao2017"></dt-cite>)</figcaption>
+                </figure>
                 <p class="toRender">
                     Broadly, the process aims to reconstruct every deep feature maps of the two latent images, starting at the fifth layer and working its way back to the first layer of VGG. Therefore, before starting this process, the two reference images are fed to the network and their deep features are saved. The feature maps of the two latent images at the deepest layer (L=5) are initialized to the same values as the reference images (more specifically, $F^{(5)}_{A2}$ is initialized with $F^{(5)}_{A1}$ and $F^{(5)}_{B2}$ is initialized with $F^{(5)}_{B1}$). Then, for each layer $L$, an NNF-search (Deep PatchMatch) is performed to discover the mapping functions $\phi^{(L)}_{ab}$ and $\phi^{(L)}_{ba}$, followed by an optimization phase (Deep Reconstruction) that aims to reconstruct the feature maps $F^{(L-1)}_{A2}$ and $F^{(L-1)}_{B2}$ of the latent images at layer $L-1$. The Deep PatchMatch and Deep Reconstruction phases are explained in more details in the next sections.
                 </p>
 
-            <h3>Deep PatchMatch</h3>
+            <h3 class="sub-section-title">1. Deep PatchMatch</h3>
                 <p>
                     One key element of the method is that the PatchMatch is applied to find correspondances between the deep features of the reference and latent images. Applying this technique at such a deep level of image features allows to map semantic elements of both images to one another. The next figure shows how the eyes of the two reference images are very similarly represented at that depth.
                 </p>
                 <figure>
                     <center><img class="image" src="images/semantic_correspondances.png"></center>
-                <figcaption style="text-align: center;">Both faces, very dissimilar at the pixel level, are now represented in very similar ways at the 5th layer. (Images from <dt-cite key="liao2017"></dt-cite>)</figcaption>
+                    <figcaption style="text-align: center;">Both faces, very dissimilar at the pixel level, are now represented in very similar ways at the 5th layer. (Images from <dt-cite key="liao2017"></dt-cite>)</figcaption>
+                </figure>
                 <p class="toRender">
                     Another key element is that the random search in deep patch match is locally constrained. The mapping function for the fifth layer is randomly initialized and has access to the whole image in the random search phase in order to find the best possible matches for each semantic attributes. However, the mapping functions for $L \in \{1,2,3,4\}$ are initilized with an upsampled version of the previous layer, and their random search only has access to a small centered at the current best match, making it impossible to completely destroy the mapping that had been established in previous layers. Therefore, the correspondances found at the deepest layers serve as the foundation upon which the next mapping functions are built, and those shallower layers mapping only are fine-tuned versions of the deeper ones. This fine-tuning effect is illustrated in the following figure.
                 </p>
               <figure>
                     <center><img class="image" src="images/spatial_constraint.png"></center>
-                <figcaption style="text-align: center;">The fifth layer finds the semantic correspondances. This mapping is then fine-tuned to fit smaller details and textures as the process takes us to shallower and shallower layers.</figcaption>
+                    <figcaption style="text-align: center;">The fifth layer finds the semantic correspondances. This mapping is then fine-tuned to fit smaller details and textures as the process takes us to shallower and shallower layers.</figcaption>
+              </figure>
 
-
-            <h3>Deep Reconstruction</h3>
+            <h3 class="sub-section-title">2. Deep Reconstruction</h3>
                 <!-- here explain every step an notion involved in the feature reconstruction -->
                 <p>
                   The feature reconstruction phase consists in 3 steps : <i>(1)</i> the feature map warping using NNFs computed in previous layers, <i>(2)</i> the deconvolution and <i>(3)</i> the feature blending.
@@ -197,17 +220,17 @@ function renderLoading(figure) {
 
             <hr> <!--Separation line-->
             <!-- SECTION ____________________________________________________________________________-->
-            <h2>Results and discussion</h2>
+            <h2 class="section-title">Results and discussion</h2>
                 <p> Blablabla</p>
 
-            <h3>Comparisons</h3>
+            <h3 class="sub-section-title">Comparisons</h3>
 
-            <h3>Limitations</h3>
+            <h3 class="sub-section-title">Limitations</h3>
 
 
             <hr> <!--Separation line-->
             <!-- SECTION ____________________________________________________________________________-->
-            <h2>Conclusion</h2>
+            <h2 class="sub-section-title">Conclusion</h2>
                 <p> Blablabla</p>
 
 
@@ -296,64 +319,65 @@ function renderLoading(figure) {
                 <p>Thank you to Pr. Christopher Pal for allowing us to use GPUs from his server to perform our experiments.</p>
 
         <script type="text/javascript">
-        var el = document.getElementsByClassName("toRender")
-        for (var i = 0; i < el.length; i++) {
-            renderMath(el[i]);
-        }
+            var el = document.getElementsByClassName("toRender")
+            for (var i = 0; i < el.length; i++) {
+                renderMath(el[i]);
+            }
         </script>
 
-<script type="text/bibliography">
+        <script type="text/bibliography">
 
-@article{liao2017,
-  title={Visual Attribute Transfer through Deep Image Analogy},
-  author={Liao, Jing and Yao, Yuan and Yuan, Lu and Hua, Gang and Kang, Sing Bing},
-  journal={arXiv preprint arXiv:1705.01088},
-  year={2017}
-}
+            @article{liao2017,
+              title={Visual Attribute Transfer through Deep Image Analogy},
+              author={Liao, Jing and Yao, Yuan and Yuan, Lu and Hua, Gang and Kang, Sing Bing},
+              journal={arXiv preprint arXiv:1705.01088},
+              year={2017}
+            }
 
-@inproceedings{gatys2016,
-  title={Image style transfer using convolutional neural networks},
-  author={Gatys, Leon A and Ecker, Alexander S and Bethge, Matthias},
-  booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition},
-  pages={2414--2423},
-  year={2016}
-}
+            @inproceedings{gatys2016,
+              title={Image style transfer using convolutional neural networks},
+              author={Gatys, Leon A and Ecker, Alexander S and Bethge, Matthias},
+              booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition},
+              pages={2414--2423},
+              year={2016}
+            }
 
-@inproceedings{barnes2010,
-  title={The generalized patchmatch correspondence algorithm},
-  author={Barnes, Connelly and Shechtman, Eli and Goldman, Dan B and Finkelstein, Adam},
-  booktitle={European Conference on Computer Vision},
-  pages={29--43},
-  year={2010},
-  organization={Springer}
-}
+            @inproceedings{barnes2010,
+              title={The generalized patchmatch correspondence algorithm},
+              author={Barnes, Connelly and Shechtman, Eli and Goldman, Dan B and Finkelstein, Adam},
+              booktitle={European Conference on Computer Vision},
+              pages={29--43},
+              year={2010},
+              organization={Springer}
+            }
 
-@article{SimonyanZ14a,
-  author    = {Karen Simonyan and
-               Andrew Zisserman},
-  title     = {Very Deep Convolutional Networks for Large-Scale Image Recognition},
-  journal   = {CoRR},
-  volume    = {abs/1409.1556},
-  year      = {2014},
-  url       = {http://arxiv.org/abs/1409.1556},
-  archivePrefix = {arXiv},
-  eprint    = {1409.1556},
-  timestamp = {Wed, 07 Jun 2017 14:41:51 +0200},
-  biburl    = {http://dblp.org/rec/bib/journals/corr/SimonyanZ14a},
-  bibsource = {dblp computer science bibliography, http://dblp.org}
-}
+            @article{SimonyanZ14a,
+              author    = {Karen Simonyan and
+                           Andrew Zisserman},
+              title     = {Very Deep Convolutional Networks for Large-Scale Image Recognition},
+              journal   = {CoRR},
+              volume    = {abs/1409.1556},
+              year      = {2014},
+              url       = {http://arxiv.org/abs/1409.1556},
+              archivePrefix = {arXiv},
+              eprint    = {1409.1556},
+              timestamp = {Wed, 07 Jun 2017 14:41:51 +0200},
+              biburl    = {http://dblp.org/rec/bib/journals/corr/SimonyanZ14a},
+              bibsource = {dblp computer science bibliography, http://dblp.org}
+            }
 
-@inproceedings{pouli2010,
-  title={Progressive histogram reshaping for creative color transfer and tone reproduction},
-  author={Pouli, Tania and Reinhard, Erik},
-  booktitle={Proceedings of the 8th International Symposium on Non-Photorealistic Animation and Rendering},
-  pages={81--90},
-  year={2010},
-  organization={ACM}
-}
+            @inproceedings{pouli2010,
+              title={Progressive histogram reshaping for creative color transfer and tone reproduction},
+              author={Pouli, Tania and Reinhard, Erik},
+              booktitle={Proceedings of the 8th International Symposium on Non-Photorealistic Animation and Rendering},
+              pages={81--90},
+              year={2010},
+              organization={ACM}
+            }
+
+        </script>
 
 
-</script>
-
-
-</dt-article></body></html>
+        </dt-article>
+    </body>
+</html>
