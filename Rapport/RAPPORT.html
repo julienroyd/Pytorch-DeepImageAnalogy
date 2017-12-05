@@ -220,7 +220,7 @@
                   Provided we have $\phi^{L}_{a \to b}$ the nearest neighbour field at layer $L$, we apply a warping operation to $F_{B1}^{L}$ such that:
                   $$\forall \text{ pixel } p \in F_{B1}^{L}, \text{ warp}(F_{B1}^{L}(p)) = F_{B1}^{L} \circ \phi_{a \to b}(p) = F_{B1}^{L}(\phi_{a \to b}(p))$$
                   Thus, the warped feature map $F_{B1}^{L}(\phi_{a \to b})$. The warped feature maps represents a version of $F_{B1}^{L}$ where every semantic concept has been shifted to match the location of its correspondant in $F_{A1}^{L}$.
-                  It makes sense that if we are to blend feature maps of both images we must make sure that their matching semantic concepts have the same location, in order for the resultant feature map to keep some consistency in terms of semantic information.
+                  It makes sense that if we are to later blend feature maps of both images we must make sure that their matching semantic concepts have the same location, in order for the resultant feature map to keep some consistency in terms of semantic information; in other words they must have the same structure.
                 </p>
                 <figure id="" style="padding:5px 5px 0px 0px">
                   <center style="position:relative; top:-35px">
@@ -234,15 +234,27 @@
                 <h4>Deconvolution</h4>
                 <p class="toRender">
                   Since the goal is to recover $F_{A2}^{L-1}$, that is the feature maps at the previous layer, we must deconvolve the features of the current layer <i>L</i> using the appropriate subnet $CNN_{L-1}^{L}$ of VGG-19. This deconvolution task is here formulated as an optimization problem, in which the targets are the warped features $F_{B1}^{L}(\phi_{a \to b})$, and the loss function :
-                  $$ \mathcal{L}_{{R_{B2}^{L-1}}} = \| CNN_{L-1}^{L}(R_{B1}^{L}) - F_{B1}^{L}(\phi_{a \to b}^{L}) \|^{2} $$
-                  Using the convolutional network here allows, again, to take advantage of the local consistency of the semantic information in features. As the network already knows how to build the feature maps and extract semantic information, it can be used in this fashion, to reverse its doing. Via the deconvolution viewed as an optimization problem, we can determine the features $R_{B1}^{L}$ which should be fed into the previous layer in order to obtain the warped features we have at the current layer. We initialize $R_{B1}^{L}$ with a random [gaussian] noise, and solve the numerical optimization problem through gradient descent $\partial \mathcal{L}_{{R_{B2}^{L-1}}}/{ \partial R_{B2}^{L-1} }$.
+                  $$ \mathcal{L}_{{R_{B1}^{L-1}}} = \| CNN_{L-1}^{L}(R_{B1}^{L}) - F_{B1}^{L}(\phi_{a \to b}^{L}) \|^{2} $$
+                  Using the convolutional network here allows, again, to take advantage of the local consistency of the semantic information in features. As the network already knows how to build the feature maps and extract semantic information, it can be used in this fashion, to reverse its doing. Via the deconvolution viewed as an optimization problem, we can determine the features $R_{B1}^{L}$ which should be fed into the previous layer in order to obtain the warped features we have at the current layer. We initialize $R_{B1}^{L}$ with a random [gaussian] noise, and solve the numerical optimization problem through gradient descent $\partial \mathcal{L}_{{R_{B1}^{L-1}}}/{ \partial R_{B1}^{L-1} }$.
                 </p>
                 <p class="toRender">
                   Though the <dt-cite key="Zhu1997">L-BFGS optimization</dt-cite> was used in the original paper, we opted for the <dt-cite key="KingmaB14">Adamax optimizer</dt-cite> since it has been shown to converge faster in our experiments.
                 </p>
 
                 <h4>Feature blending</h4>
-                <p class="toRender">  </p>
+                <p class="toRender">
+                  The goal of the feature blending is to reconstruct the latent feature map $F_{A2}^{L-1}$ at layer $L-1$ by fusing the content features of $F_{A1}^{L-1}$ with the style and/or details features of the deconvolved $R_{B1}^{L-1}$ such that:
+                  $$F_{A2}^{L-1} = W_{A1}^{L-1} \odot F_{A1}^{L-1} - (1 - W_{A1}^{L-1}) \odot R_{B1}^{L-1}$$
+                  where $\odot$ is the element-wise multiplication, and $W_{A1}^{L-1}$ is a weight map.
+                </p>
+                <p class="toRender">
+                  The weight map is computed as a function of the magnitudes of neuron responses at layer $L-1$ to the content structure in image <i>A1</i>. We have :
+
+                  $$ W_{A}^{L-1} = \alpha_{L-1} M_{A}^{L-1} $$
+                  $$ M_{A}^{L-1} = \mathrm{sigmoid}\left( \kappa \times \left( |F_{A1}^{L-1}|^{2} - \tau \right) \right) $$
+
+                  where $\kappa=300$ and $\tau=0.05$ and $\lbrace \alpha_{L} \rbrace_{L \in 1..4} = \lbrace 0.1, 0.6, 0.7, 0.8 \rbrace$, values used in the original paper.
+                </p>
 
             <h3 class="sub-section-title">3. Implementation details</h3>
                 <p> Our implementation of Deep Image Analogy is in Python, and uses the deep learning framework pytorch for manipulating tensors and easily use and compare optimization algorithms. The PatchMatch steps, being highly dependant on intricate loops are processed on CPU. The reconstruction phase formulated as an optimization problem is computed on GPU. We use the squared Euclidean distance for similarity metric between deep patches.</p>
