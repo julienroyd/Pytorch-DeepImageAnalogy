@@ -11,8 +11,8 @@
             - Julien Roy: https://github.com/julienroy13
             - David Kanaa: https://github.com/davidkanaa
           affiliations:
-              - Polytechnique Montreal: "http://ww.polymtl.ca"
-              - Polytechnique Montreal: "http://ww.polymtl.ca"
+              - Polytechnique Montreal: "http://www.polymtl.ca"
+              - Polytechnique Montreal: "http://www.polymtl.ca"
         </script>
         <!-- Katex -->
         <script src="assets/lib/auto-render.min.js"></script>
@@ -104,7 +104,7 @@
                     Gatys <i>et al.</i> developped the first algorithm that uses a deep convolutional neural network (CNN) to capture and modelize the style of an image. This technique is refered to as <dt-cite key="gatys2016">Neural Style Transfer</dt-cite>. However, while being able to produce impressive results, this approach fails to carry out style transfer in a manner that preserves the semantic correspondances between the two original images. For example, the algorithm won't distinguish the difference between the background and the main objects of both scenes, and thus will apply the style in an homogenous manner to the generated image without any regard about where which part of the style should be applied.
                 </p>
                 <p>
-                    Liao <i>et al.</i> solve that issue by introducing <dt-cite key="liao2017">Deep Image Analogy</dt-cite>. This algorithm is inspired by the original Neural Style Transfer as it still uses a pretrained deep CNN to extract information about the images, but also cleverly apply the Patch Match method<dt-cite key="barnes2010"></dt-cite> on deep feature maps constructed by that CNN to take into account semantic correspondances between the two base images. Therefore, they iteratively progress in a coarse-to-fine manner (from the deeper to shallower representations) to generate the new latent image that both presents the style of one reference, and the content of another, in a semantically consistent fashion.
+                    Liao <i>et al.</i> solve that issue by introducing <dt-cite key="liao2017">Deep Image Analogy</dt-cite>. This algorithm is inspired by the original Neural Style Transfer as it still uses a pretrained deep CNN to extract information about the images, but also cleverly apply the Patch Match method<dt-cite key="barnes2009"></dt-cite> on deep feature maps constructed by that CNN to take into account semantic correspondances between the two base images. Therefore, they iteratively progress in a coarse-to-fine manner (from the deeper to shallower representations) to generate the new latent image that both presents the style of one reference, and the content of another, in a semantically consistent fashion.
                 </p>
                 <hr> <!--Separation line-->
 
@@ -114,20 +114,20 @@
 
             <h3 class="sub-section-title">1. Randomized Patch-Match algorithm</h3>
                 <p class="toRender">
-                    Patch matching refers to the problem of finding the nearest neighbor patch in an image <i>B</i> to a source patch in an image <i>A</i>. The result of this process is a mapping function $\phi_{a \to b}$ called Nearest-Neighbor Field (NNF) that is of the same size as image <i>A</i>, and which defines a mapping from pixels in <i>A</i> to those in <i>B</i> : let <i>p</i> be a pixel in <i>A</i> and $N(p)$ a fixed patch centered on <i>p</i>, $\phi_{a \to b}(p)=q$ is the pixel in <i>B</i> such that $N(q)$ is the nearest patch in <i>B</i> to $N(p)$, with respect to some similarity $d(.,.)$. The patches are usually extended to all channels of an image, so for a 3 channels RGB image, a $3\times3$ patch would in fact refer to a $3\times3\times3$ tensor. Different similarity metrics can be used to define the nearest patch may be used, a simple one being the squared Euclidean distance :
+                    Patch matching refers to the problem of finding the nearest neighbor patch in an image <i>B</i> to a source patch in an image <i>A</i>. The result of this process is a mapping function $\phi_{a \to b}$ called Nearest-Neighbor Field (NNF) that is of the same size as image <i>A</i>, and which defines a mapping from pixels in <i>A</i> to pixels in <i>B</i> : let <i>p</i> be a pixel in <i>A</i> and $N(p)$ a fixed patch centered on <i>p</i>, $\phi_{a \to b}(p)=q$ is the pixel in <i>B</i> such that $N(q)$ is the nearest patch in <i>B</i> to $N(p)$, with respect to some distance $d(N(p),N(q))$. The patches are usually extended to all channels of an image, so for a 3 channels RGB image, a $3\times3$ patch would in fact refer to a $3\times3\times3$ tensor. Different similarity metrics can be used to define the nearest patch may be used, a simple one being the squared Euclidean distance :
 
                     $$ d(P^{A}, P^{B}) = \| P^{A}-P^{B} \|_{2}^{2}= \sum_{i,j,k} (P^{A}_{ijk} - P^{B}_{ijk})^{2}$$
                 </p>
                 <p>
-                    The main challenge is the number of patches to compare with each other, which grows exponentially with the size of the images. Luckily, the Randomized approach to <dt-cite key="barnes2010">PatchMatch</dt-cite> allows to find very good estimate solutions in a much shorter amount of time. The strategy is simple, the NNF is initialized randomly. Then, for each pixels, we execute two steps : propagation and random search. Propagation refers to looking at the pixel's neighbors to see if they could find a better match than it's own. Random search consists in randomly selecting potential match candidates in a certain area, and see if they offer a better match than the current one. Those steps are illustrated in the next figure.
+                    The main challenge lies in the intractable number of patches that needs to be compared with each other, which grows exponentially with the size of the images. Luckily, the Randomized approach to <dt-cite key="barnes2009">PatchMatch</dt-cite> allows to find very good estimate solutions in a much shorter amount of time. The strategy is simple. First, the NNF is initialized randomly. Then, for each pixels, we execute two steps : propagation and random search. Propagation refers to looking at the pixel's neighbors to see if they could find a better match than its own. Random search consists in randomly selecting potential match candidates in a certain area, and see if they offer a better match than the current one. Those steps are illustrated in the next figure.
 
                     <figure>
                         <center><img class="image" src="images/patch_match.png" height="400px"></center>
-                        <figcaption style="text-align: center;">Randomized Patch-Match illustrated as a 3-step process (Figure from :<dt-cite key="barnes2010"></dt-cite>)</figcaption>
+                        <figcaption style="text-align: center;">Randomized Patch-Match illustrated as a 3-step process (Figure from :<dt-cite key="barnes2009"></dt-cite>)</figcaption>
                     </figure>
                 </p>
                 <p>
-                    This approach depends on the reasonable assumption that natural images are usually spatially smooth. That means that small sub-regions of the image will usually have similar colors, so successive patches in image <i>A</i> might want to share the same correspondances in image <i>B</i> (propagation step) and that randomly sampling patches to compare with that come from different sub-regions counts as an efficient scan of the image in order to find a good neighborhood (random search step). When the PatchMatch is successful, one can express image <i>A</i> only in terms of pixels in image <i>B</i>, a process shown in the next figure. This resulting hybrid image is called a <i>warp</i>.
+                    This approach depends on the reasonable assumption that natural images are usually spatially smooth. That means that small sub-regions of the image will usually have similar colors, so successive patches in image <i>A</i> might want to share the same correspondances in image <i>B</i> (propagation step) and that comparing with randomly sampled patches from different sub-regions counts as an effective scan of the image in order to find a good neighborhood (random search step). When the PatchMatch is successful, one can express image <i>A</i> only in terms of pixels in image <i>B</i>, a process shown in the next figure. This resulting hybrid image is called a <i>warp</i>.
                 </p>
                 <figure>
                     <center><img class="image" src="images/warp.png"></center>
@@ -137,16 +137,10 @@
                     </figcaption>
                 </figure>
 
-            <h3 class="sub-section-title">2. Semantic feature extraction with deep CNNs</h3>
+            <h3 class="sub-section-title">2. Deep image representations in CNNs</h3>
                 <!-- here give some background info on deep CNNs used in image recognition tasks and VGG trained for classification and recently used for style Transfer -->
                 <p class="toRender">
-                  Despite the fact that the <dt-cite key="barnes2010">Ranomized PacthMatch</dt-cite> algorithm performs well at matching pixels across two images such that one can be recovered (as best as possible) by warping the other (using the correcpondant nearest neighbour field), it only operates on raw pixels and does not take into account the inherent semantic structure of the provided images.
-                </p>
-                <p class="toRender">
-                  <dt-cite key="SimonyanZ14a">VGG-19</dt-cite> is a deep convolutional neural network architecture which have been trained and evaluated on the ImageNet data set for image classification/recognition tasks, which it has been shown to perform very well at. VGG has also been used for the <dt-cite key="gatys2016">style transfer task</dt-cite> with success.
-                  It consists of 5 convolutional blocks (made of 2, 2, 4, 4 and 4 layers respectively) supplemented with a $2\times2$ pooling layer (max or average) each, and followed by a couple of fully connected layers.
-                  The convolutional blocks of VGG use spatial coherence in images to build higher representations that do expose latent semantic information (such as eyes and nose positions for faces, colours ...etc).
-                  Each block builds a higher representation on top of the previous, extracting more and more semantics, which are later used in fully connected layers for classification.
+                  <dt-cite key="SimonyanZ14a">VGG-19</dt-cite> is a deep convolutional neural network architecture which have been trained and evaluated on the ImageNet data set for image classification/recognition tasks, and demonstrated <i>state-of-the-art</i> performance on such tasks in 2015. In short, the network consists of 5 convolutional blocks (made of 2, 2, 4, 4 and 4 layers respectively) each one followed by a $2\times2$ pooling layer, and ends with a few fully-connected layers. Each block applies further transformations on the output of the previous one, extracting higher and higher level information that expose latent semantic information (such as eyes and nose positions for faces, textural representations, etc). This high level information is later used by the fully connected layers for classification.
                 </p>
                 <figure id="" style="padding:5px 5px 0px 0px">
                   <center style="position:relative; top:-35px">
@@ -181,19 +175,23 @@
                     <figcaption style="text-align: center;">Overview of Deep Image Analogy (Figure from :<dt-cite key="liao2017"></dt-cite>)</figcaption>
                 </figure>
                 <p class="toRender">
-                    Broadly, the process aims at reconstructing all deep feature maps of both provided images, starting at the fifth layer and all the way back to the first layer of VGG. Therefore, before starting this process, the two reference images are fed to the network and their deep features are saved. The feature maps of the two latent images at the deepest layer ($L=5$) are initialized to the same values as the reference images (more specifically, $F^{(5)}_{A2}$ is initialized with $F^{(5)}_{A1}$ and $F^{(5)}_{B2}$ is initialized with $F^{(5)}_{B1}$). Then, for each layer $L$, an NNF-search (Deep PatchMatch) is performed to discover the mapping functions $\phi^{(L)}_{a \to b}$ and $\phi^{(L)}_{b \to a}$, followed by an optimization phase (Deep Reconstruction) that aims at reconstructing the feature maps $F^{(L-1)}_{A2}$ and $F^{(L-1)}_{B2}$ of the images at layer $L-1$. The Deep PatchMatch and Deep Reconstruction phases are explained in more details in the next sections.
+                    Broadly, the process aims at reconstructing the deep feature maps of both latent images, starting at the fifth layer and working its the way back to the first layer of VGG. Therefore, before starting this process, the two reference images are fed to the network and their deep features are saved. The feature maps of the two latent images at the deepest layer ($L=5$) are initialized to the same values as the reference images (more specifically, $F^{(5)}_{A2}$ is initialized with $F^{(5)}_{A1}$ and $F^{(5)}_{B2}$ is initialized with $F^{(5)}_{B1}$). Then, for each layer $L$, an NNF-search (Deep PatchMatch) is performed to discover the mapping functions $\phi^{(L)}_{a \to b}$ and $\phi^{(L)}_{b \to a}$, followed by an optimization phase (Deep Reconstruction) that aims at reconstructing the feature maps $F^{(L-1)}_{A2}$ and $F^{(L-1)}_{B2}$ of the images at layer $L-1$. The Deep PatchMatch and Deep Reconstruction phases are explained in more details in the next sections.
                 </p>
 
             <h3 class="sub-section-title">1. Deep PatchMatch</h3>
                 <p>
-                    One key element of the method is that the PatchMatch is applied to find correspondances between the deep features of the reference and latent images. Applying this technique at such a deep level of image features allows to map semantic elements of both images to one another. The next figure shows how the eyes of the two reference images are very similarly represented at that depth.
+                    PatchMatch approach usually operates on raw pixels. That allows to find color correspondances between images but does not take into account the inherent semantic structure of the provided images.
+                </p>
+
+                <p>
+                    One key element of the DeepImageAnalogy method is that the PatchMatch is applied to find correspondances between the deep features of the reference and latent images. Applying this technique at such a deep level of image features allows to map semantic elements of both images to one another. The next figure shows how the eyes of the two reference images are very similarly represented at that depth.
                 </p>
                 <figure>
                     <center><img class="image" src="images/semantic_correspondances.png"></center>
                     <figcaption style="text-align: center;">Both faces, very dissimilar at the pixel level, are now represented in very similar ways at the 5th layer. (Images from <dt-cite key="liao2017"></dt-cite>)</figcaption>
                 </figure>
                 <p class="toRender">
-                    Another key element is that the random search in deep patch match is locally constrained. The mapping function for the fifth layer is randomly initialized and has access to the whole image in the random search phase in order to find the best possible matches for each semantic attributes. However, the mapping functions for $L \in \{1,2,3,4\}$ are initilized with an upsampled version of the previous layer, and their random search only has access to a small centered at the current best match, making it impossible to completely destroy the mapping that had been established in previous layers. Therefore, the correspondances found at the deepest layers serve as the foundation upon which the next mapping functions are built, and those shallower layers mapping only are fine-tuned versions of the deeper ones. This fine-tuning effect is illustrated in the following figure.
+                    Another key element is that the random search in deep patch match is locally constrained. The mapping function for the fifth layer is randomly initialized and has access to the whole image in the random search phase in order to find the best possible matches for each semantic attributes. However, the mapping functions for $L \in \{1,2,3,4\}$ are initilized with an upsampled version of the previous layer, and their random search only has access to a small region centered at the current best match, making it impossible to completely destroy the mapping that had been established in previous layers. Therefore, the correspondances found at the deepest layers serve as the foundation upon which the next mapping functions are built, and those shallower layers mapping only are fine-tuned versions of the deeper ones. This fine-tuning effect is illustrated in the following figure.
                 </p>
               <figure>
                     <center><img class="image" src="images/spatial_constraint.png"></center>
@@ -203,9 +201,8 @@
             <h3 class="sub-section-title">2. Deep Reconstruction</h3>
                 <!-- here explain every step an notion involved in the feature reconstruction -->
                 <p class="toRender">
-                  For every layer $L \in \lbrack 2..5 \rbrack$, assume we have the pair of feature maps $F_{A1}^{L-1}$, $F_{B1}^{L}$, respectively of image <i>A1</i> at later $L-1$ and <i>B1</i> at layer $L$.
-                  The goal of the feature reconstruction is to recover features of <i>A2</i> at layer $L-1$ before further computation of NNFs at this layer. This phase consists in 3 steps : <i>(1)</i> the feature map warping using NNFs computed in previous layers, <i>(2)</i> the deconvolution and <i>(3)</i> the feature blending.
-                  Here we explain each of them.
+                  For every layer $L \in \lbrack 2..5 \rbrack$, we use the pair of feature maps $F_{A1}^{L-1}$ and $F_{B1}^{L}$, respectively of image <i>A1</i> at layer $L-1$ and <i>B1</i> at layer $L$.
+                  The goal of the feature reconstruction is to recover the features of <i>A2</i> at layer $L-1$. This phase consists in 3 steps : <i>(1)</i> the feature map warping using NNFs computed in current layer, <i>(2)</i> the deconvolution and <i>(3)</i> the feature blending.
                 </p>
                 <figure id="" style="padding:5px 5px 0px 0px">
                   <center style="position:relative; top:-35px">
@@ -217,9 +214,9 @@
                 </figure>
                 <h4>Feature warping</h4>
                 <p class="toRender">
-                  Provided we have $\phi^{L}_{a \to b}$ the nearest neighbour field at layer $L$, we apply a warping operation to $F_{B1}^{L}$ such that:
-                  $$\forall \text{ pixel } p \in F_{B1}^{L}, \text{ warp}(F_{B1}^{L}(p)) = F_{B1}^{L} \circ \phi_{a \to b}(p) = F_{B1}^{L}(\phi_{a \to b}(p))$$
-                  Thus, the warped feature map $F_{B1}^{L}(\phi_{a \to b})$. The warped feature maps represents a version of $F_{B1}^{L}$ where every semantic concept has been shifted to match the location of its correspondant in $F_{A1}^{L}$.
+                  The warp of image <i>B1</i> using $\phi^{L}_{a \to b}$ should give feature maps that have the approximate content than the feature maps of <i>A1</i>, but exprimed only in terms of patches takent from the feature maps of <i>B1</i>. Provided that we have this $\phi^{L}_{a \to b}$, the nearest neighbour field at layer $L$, we apply a warping operation to $F_{B1}^{L}$ such that:
+                  $$\forall \text{ pixel } p \in F_{B1}^{L}, \text{ warp}(F_{B1}^{L}(p)) = F_{B1}^{L}(\phi_{a \to b}(p))$$
+                  Therefore, the warped feature maps represents a version of $F_{B1}^{L}$ where every semantic concept has been shifted to match the location of its correspondant in $F_{A1}^{L}$.
                   It makes sense that if we are to later blend feature maps of both images we must make sure that their matching semantic concepts have the same location, in order for the resultant feature map to keep some consistency in terms of semantic information; in other words they must have the same structure.
                 </p>
                 <figure id="" style="padding:5px 5px 0px 0px">
@@ -244,7 +241,7 @@
                 <h4>Feature blending</h4>
                 <p class="toRender">
                   The goal of the feature blending is to reconstruct the latent feature map $F_{A2}^{L-1}$ at layer $L-1$ by fusing the content features of $F_{A1}^{L-1}$ with the style and/or details features of the deconvolved $R_{B1}^{L-1}$ such that:
-                  $$F_{A2}^{L-1} = W_{A1}^{L-1} \odot F_{A1}^{L-1} - (1 - W_{A1}^{L-1}) \odot R_{B1}^{L-1}$$
+                  $$F_{A2}^{L-1} = W_{A1}^{L-1} \odot F_{A1}^{L-1} + (1 - W_{A1}^{L-1}) \odot R_{B1}^{L-1}$$
                   where $\odot$ is the element-wise multiplication, and $W_{A1}^{L-1}$ is a weight map.
                 </p>
                 <p class="toRender">
@@ -384,13 +381,14 @@
               year={2016}
             }
 
-            @inproceedings{barnes2010,
-              title={The generalized patchmatch correspondence algorithm},
-              author={Barnes, Connelly and Shechtman, Eli and Goldman, Dan B and Finkelstein, Adam},
-              booktitle={European Conference on Computer Vision},
-              pages={29--43},
-              year={2010},
-              organization={Springer}
+            @article{barnes2009,
+              title={PatchMatch: A randomized correspondence algorithm for structural image editing},
+              author={Barnes, Connelly and Shechtman, Eli and Finkelstein, Adam and Goldman, Dan B},
+              journal={ACM Trans. Graph.},
+              volume={28},
+              number={3},
+              pages={24--1},
+              year={2009}
             }
 
             @article{SimonyanZ14a,
