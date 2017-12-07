@@ -1,107 +1,83 @@
+# VGG implementation using torchvision (inspired from : https://github.com/harveyslash/Deep-Image-Analogy-PyTorch)
 from config import config
-
 import torch
+from torch.autograd import Variable
 import torch.nn as nn
 import torch.nn.functional as F
-
 import torchvision
 from torchvision import transforms
 
 
-# VGG implementation (taken from github : leongatys/PytorchNeuralStyleTransfer)
-class VGG(nn.Module):
-    def __init__(self, pool='max'):
-        super(VGG, self).__init__()
-        #vgg modules
-        self.conv1_1 = nn.Conv2d(3, 64, kernel_size=3, padding=1)
-        self.conv1_2 = nn.Conv2d(64, 64, kernel_size=3, padding=1)
-        self.conv2_1 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
-        self.conv2_2 = nn.Conv2d(128, 128, kernel_size=3, padding=1)
-        self.conv3_1 = nn.Conv2d(128, 256, kernel_size=3, padding=1)
-        self.conv3_2 = nn.Conv2d(256, 256, kernel_size=3, padding=1)
-        self.conv3_3 = nn.Conv2d(256, 256, kernel_size=3, padding=1)
-        self.conv3_4 = nn.Conv2d(256, 256, kernel_size=3, padding=1)
-        self.conv4_1 = nn.Conv2d(256, 512, kernel_size=3, padding=1)
-        self.conv4_2 = nn.Conv2d(512, 512, kernel_size=3, padding=1)
-        self.conv4_3 = nn.Conv2d(512, 512, kernel_size=3, padding=1)
-        self.conv4_4 = nn.Conv2d(512, 512, kernel_size=3, padding=1)
-        self.conv5_1 = nn.Conv2d(512, 512, kernel_size=3, padding=1)
-        self.conv5_2 = nn.Conv2d(512, 512, kernel_size=3, padding=1)
-        self.conv5_3 = nn.Conv2d(512, 512, kernel_size=3, padding=1)
-        self.conv5_4 = nn.Conv2d(512, 512, kernel_size=3, padding=1)
-        if pool == 'max':
-            self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
-            self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
-            self.pool3 = nn.MaxPool2d(kernel_size=2, stride=2)
-            self.pool4 = nn.MaxPool2d(kernel_size=2, stride=2)
-            self.pool5 = nn.MaxPool2d(kernel_size=2, stride=2)
-        elif pool == 'avg':
-            self.pool1 = nn.AvgPool2d(kernel_size=2, stride=2)
-            self.pool2 = nn.AvgPool2d(kernel_size=2, stride=2)
-            self.pool3 = nn.AvgPool2d(kernel_size=2, stride=2)
-            self.pool4 = nn.AvgPool2d(kernel_size=2, stride=2)
-            self.pool5 = nn.AvgPool2d(kernel_size=2, stride=2)
+class FeatureExtractor(nn.Sequential):
+    def __init__(self):
+        super(FeatureExtractor, self).__init__()
+
+    def forward(self, x):
+        outputs = []
+        for module in self._modules:
+            x = self._modules[module](x)
+            outputs.append(x)
+        return outputs
+
+
+class VGG19:
+    def __init__(self):
+        self.cnn_temp = torchvision.models.vgg19(pretrained=True).features
+        self.model = FeatureExtractor()
+        
+        conv_counter = 1
+        relu_counter = 1
+        block_counter = 1
+
+        for i, layer in enumerate(list(self.cnn_temp)):
+
+            if isinstance(layer, nn.Conv2d):
+                name = "conv_" + str(block_counter) + "_" + str(conv_counter) + "__" + str(i)
+                conv_counter += 1
+                self.model.add_module(name, layer)
+
+            if isinstance(layer, nn.ReLU):
+                name = "relu_" + str(block_counter) + "_" + str(relu_counter) + "__" + str(i)
+                relu_counter += 1
+                self.model.add_module(name, nn.ReLU(inplace=False))
+
+            if isinstance(layer, nn.MaxPool2d):
+                name = "pool_" + str(block_counter) + "__" + str(i)
+                relu_counter = conv_counter = 1
+                block_counter += 1
+                self.model.add_module(name, nn.AvgPool2d((2,2)))
+
+        if torch.cuda.is_available():
+            self.model.cuda()
             
-    def forward(self, x, out_keys):
-        out = {}
-        out['r11'] = F.relu(self.conv1_1(x))
-        out['r12'] = F.relu(self.conv1_2(out['r11']))
-        out['p1'] = self.pool1(out['r12'])
-        out['r21'] = F.relu(self.conv2_1(out['p1']))
-        out['r22'] = F.relu(self.conv2_2(out['r21']))
-        out['p2'] = self.pool2(out['r22'])
-        out['r31'] = F.relu(self.conv3_1(out['p2']))
-        out['r32'] = F.relu(self.conv3_2(out['r31']))
-        out['r33'] = F.relu(self.conv3_3(out['r32']))
-        out['r34'] = F.relu(self.conv3_4(out['r33']))
-        out['p3'] = self.pool3(out['r34'])
-        out['r41'] = F.relu(self.conv4_1(out['p3']))
-        out['r42'] = F.relu(self.conv4_2(out['r41']))
-        out['r43'] = F.relu(self.conv4_3(out['r42']))
-        out['r44'] = F.relu(self.conv4_4(out['r43']))
-        out['p4'] = self.pool4(out['r44'])
-        out['r51'] = F.relu(self.conv5_1(out['p4']))
-        out['r52'] = F.relu(self.conv5_2(out['r51']))
-        out['r53'] = F.relu(self.conv5_3(out['r52']))
-        out['r54'] = F.relu(self.conv5_4(out['r53']))
-        out['p5'] = self.pool5(out['r54'])
-        return [out[key] for key in out_keys]
+
+    def forward_subnet(self, input_tensor, L):
+        
+        if L == 5:
+            start_layer,end_layer = 21,29 # From Conv4_2 to ReLU5_1 inclusively
+        elif L == 4:
+            start_layer,end_layer = 12,20 # From Conv3_2 to ReLU4_1 inclusively
+        elif L == 3:
+            start_layer,end_layer = 7,11 # From Conv2_2 to ReLU3_1 inclusively
+        elif L == 2:
+            start_layer,end_layer = 2,6 # From Conv1_2 to ReLU2_1 inclusively
+        else:
+            raise ValueError("Invalid layer number")
+
+        for i, layer in enumerate(list(self.model)):
+            if i >= start_layer and i <= end_layer:
+                input_tensor = layer(input_tensor)
+        return input_tensor
+
+    def forward(self, img_tensor):
+        features = self.model(img_tensor)
+
+        return features
 
 
 
 # Preprocessing
 prep = transforms.Compose([transforms.Scale(config['img_size']),
                            transforms.ToTensor(),
-                           transforms.Lambda(lambda x: x[torch.LongTensor([2,1,0])]), #turn to BGR
-                           transforms.Normalize(mean=[0.40760392, 0.45795686, 0.48501961], std=[1,1,1]), #subtract imagenet mean
-                           transforms.Lambda(lambda x: x.mul_(255)),
+                           transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]), #subtract imagenet mean
                           ])
-
-
-# Postprocessing
-postp = transforms.Compose([transforms.Lambda(lambda x: x.mul_(1./255)),
-                           transforms.Normalize(mean=[-0.40760392, -0.45795686, -0.48501961], std=[1,1,1]), #add imagenet mean
-                           ])
-
-
-
-# SUBNETS
-
-#
-class Layer(nn.Module):
-    def __init__(self, linear):
-        super(Layer, self).__init__()
-        self.linear = linear
-    
-    def forward(self, inputs):
-        outputs = self.linear(inputs)
-        return F.relu(outputs)
-    
-#
-class Net(nn.Module):
-    def __init__(self, layers):
-        super(Net, self).__init__()
-        self.layers = nn.Sequential(*layers)
-    
-    def forward(self, inputs):
-        return self.layers(inputs)

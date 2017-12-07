@@ -84,198 +84,106 @@ def initializeNNF(h, w, initialNNF=None):
     return NNF_ab
 
 
-def propagate(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, shift, config):
+def propagate(A1, B2, A2, B1, h, w, m, NNF_ab, NNF_dist, i, j, shift, config):
 
     # Extract the patches at coordinates i,j in A1 and A2
     A1_patch = Patch(A1,i,j,m)
     A2_patch = Patch(A2,i,j,m)
+
+    # Extract the patch-match in B associated with left neighbor and up neighbor in A
+    A1_RN_PM_LN = Patch(B2, 
+                     NNF_ab[0,i,valid(j+shift,w,m)], 
+                     valid(NNF_ab[1,i,valid(j+shift,w,m)]-shift,w,m), 
+                     m)
+    A2_RN_PM_LN = Patch(B1, 
+                     NNF_ab[0,i,valid(j+shift,w,m)], 
+                     valid(NNF_ab[1,i,valid(j+shift,w,m)]-shift,w,m), 
+                     m)
     
-    # Extract the patch-match in B2 associated with current position
-    A1_current_patchMatch = Patch(B2, NNF_ab[0,i,j], NNF_ab[1,i,j], m)
-    A2_current_patchMatch = Patch(B1, NNF_ab[0,i,j], NNF_ab[1,i,j], m)
+    A1_DN_PM_UP = Patch(B2, 
+                     valid(NNF_ab[0,valid(i+shift,h,m),j]-shift,h,m), 
+                     NNF_ab[1,valid(i+shift,h,m),j], 
+                     m)
+    A2_DN_PM_UP = Patch(B1, 
+                     valid(NNF_ab[0,valid(i+shift,h,m),j]-shift,h,m), 
+                     NNF_ab[1,valid(i+shift,h,m),j], 
+                     m)
+
+    # Computes the distance between potential matches
+    left_neighbor_match = distance(A1_patch, A1_RN_PM_LN, A2_patch, A2_RN_PM_LN, mode=config['distance_mode'])
+    up_neighbor_match = distance(A1_patch, A1_DN_PM_UP, A2_patch, A2_DN_PM_UP, mode=config['distance_mode'])
+
+    # Looks up which match is the best. If best match is current match, nothing is changed
+    best_match = np.argmin(np.array([NNF_dist[i,j], left_neighbor_match, up_neighbor_match]))        
     
-    # Computes the distance between current patch
-    current_match = distance(A1_patch, A1_current_patchMatch, A2_patch, A2_current_patchMatch, mode=config['distance_mode'])
+    if best_match == 1:
+        # New patch-match in B based on left-neighbor's match
+        NNF_ab[0,i,j] = NNF_ab[0,i,valid(j+shift,w,m)]
+        NNF_ab[1,i,j] = valid(NNF_ab[1,i,valid(j+shift,w,m)]-shift,w,m)
+        NNF_dist[i,j] = left_neighbor_match
 
-    if config['propagation_mode'] == 'NM':
-    
-        # Extract the patch-match in B associated with left neighbor and up neighbor in A
-        A1_leftNeighbor_patchMatch = Patch(B2, 
-                                          NNF_ab[0,i,valid(j+shift,w,m)], 
-                                          NNF_ab[1,i,valid(j+shift,w,m)], 
-                                          m)
-        A2_leftNeighbor_patchMatch = Patch(B1, 
-                                          NNF_ab[0,i,valid(j+shift,w,m)], 
-                                          NNF_ab[1,i,valid(j+shift,w,m)], 
-                                          m)
-        
-        A1_upNeighbor_patchMatch = Patch(B2, 
-                                        NNF_ab[0,valid(i+shift,h,m),j], 
-                                        NNF_ab[1,valid(i+shift,h,m),j], 
-                                        m)
-        A2_upNeighbor_patchMatch = Patch(B1, 
-                                        NNF_ab[0,valid(i+shift,h,m),j], 
-                                        NNF_ab[1,valid(i+shift,h,m),j], 
-                                        m)
-
-        # Computes the distance between potential matches
-        left_neighbor_match = distance(A1_patch, A1_leftNeighbor_patchMatch, A2_patch, A2_leftNeighbor_patchMatch, mode=config['distance_mode'])
-        up_neighbor_match = distance(A1_patch, A1_upNeighbor_patchMatch, A2_patch, A2_upNeighbor_patchMatch, mode=config['distance_mode'])
-
-        # Looks up which match is the best. If best match is current match, nothing is changed
-        best_match = np.argmin(np.array([current_match, left_neighbor_match, up_neighbor_match]))
-  
-        if best_match == 1:
-            # New patch-match in B is the same than for left-neighbor in A
-            NNF_ab[:,i,j] = NNF_ab[:,i,valid(j+shift,w,m)]
-
-        if best_match == 2:
-            # New patch-match in B is the same than for up-neighbor in A
-            NNF_ab[:,i,j] = NNF_ab[:,valid(i+shift,h,m),j]
-        
-        
-    elif config['propagation_mode'] == 'NoNM':
-    
-        # Extract the patch-match in B associated with left neighbor and up neighbor in A
-        A1_RN_PM_LN = Patch(B2, 
-                         NNF_ab[0,i,valid(j+shift,w,m)], 
-                         valid(NNF_ab[1,i,valid(j+shift,w,m)]-shift,w,m), 
-                         m)
-        A2_RN_PM_LN = Patch(B1, 
-                         NNF_ab[0,i,valid(j+shift,w,m)], 
-                         valid(NNF_ab[1,i,valid(j+shift,w,m)]-shift,w,m), 
-                         m)
-        
-        A1_DN_PM_UP = Patch(B2, 
-                         valid(NNF_ab[0,valid(i+shift,h,m),j]-shift,h,m), 
-                         NNF_ab[1,valid(i+shift,h,m),j], 
-                         m)
-        A2_DN_PM_UP = Patch(B1, 
-                         valid(NNF_ab[0,valid(i+shift,h,m),j]-shift,h,m), 
-                         NNF_ab[1,valid(i+shift,h,m),j], 
-                         m)
-
-        # Computes the distance between potential matches
-        left_neighbor_match = distance(A1_patch, A1_RN_PM_LN, A2_patch, A2_RN_PM_LN, mode=config['distance_mode'])
-        up_neighbor_match = distance(A1_patch, A1_DN_PM_UP, A2_patch, A2_DN_PM_UP, mode=config['distance_mode'])
-
-        # Looks up which match is the best. If best match is current match, nothing is changed
-        best_match = np.argmin(np.array([current_match, left_neighbor_match, up_neighbor_match]))        
-        
-        if best_match == 1:
-            # New patch-match in B based on left-neighbor's match
-            NNF_ab[0,i,j] = NNF_ab[0,i,valid(j+shift,w,m)]
-            NNF_ab[1,i,j] = valid(NNF_ab[1,i,valid(j+shift,w,m)]-shift,w,m)
-
-        if best_match == 2:
-            # New patch-match in B based on up-neighbor's match
-            NNF_ab[0,i,j] = valid(NNF_ab[0,valid(i+shift,h,m),j]-shift,h,m)
-            NNF_ab[1,i,j] = NNF_ab[1,valid(i+shift,h,m),j]
+    if best_match == 2:
+        # New patch-match in B based on up-neighbor's match
+        NNF_ab[0,i,j] = valid(NNF_ab[0,valid(i+shift,h,m),j]-shift,h,m)
+        NNF_ab[1,i,j] = NNF_ab[1,valid(i+shift,h,m),j]
+        NNF_dist[i,j] = up_neighbor_match
      
 
     return NNF_ab
 
-def random_search(A1, B1, A2, B2, px, py, nnf, half_patch, search_radius=200, reduce_ratio=0.5):
+
+def random_search(A1, B2, A2, B1, h, w, m, NNF_ab, NNF_dist, p_i, p_j, config, L):
     
     # helper : compute distance
-    def fdist(A1, B1, A2, B2, px, py, qx, qy, s):
+    def fdist(A1, B2, A2, B1, p_i, p_j, q_i, q_j, m):
     
         # extracts patches around pixel p in A1 and A2
-        A1_patch = Patch(A1, py, px, s)
-        A2_patch = Patch(A2, py, px, s)
+        A1_patch = Patch(A1, p_i, p_j, m)
+        A2_patch = Patch(A2, p_i, p_j, m)
         
         # extracts patches around pixel q in A1 and A2
-        B1_patch = Patch(B1, qy, qx, s)
-        B2_patch = Patch(B2, qy, qx, s)
+        B1_patch = Patch(B1, q_i, q_j, m)
+        B2_patch = Patch(B2, q_i, q_j, m)
         
         # compute distance (here euclidean)
-        dist = distance(A1_patch, B1_patch, A2_patch, B2_patch, mode=config['distance_mode'])
+        dist = distance(A1_patch, B2_patch, A2_patch, B1_patch, mode=config['distance_mode'])
 
         return dist
     
-    # padding = half patch size
-    pad = half_patch
+    # Random Search radius
+    rad = config["random_search_max_step"][L]
     
     # size over dimensions of interest (height, width)
     h, w = A1.size()[-2:]
     
-    # initial search radius
-    rad = search_radius
-    
     # get coordinates of current best match
-    # x: position along the width
-    # y: position along the height
-    y_match, x_match = nnf[:, py, px].numpy()
+    i_match, j_match = NNF_ab[:, p_i, p_j].numpy()
     
     # distance to current best match
-    dist_match = fdist(A1, B1, A2, B2, px, py, x_match, y_match, half_patch)
+    dist_match = NNF_dist[p_i, p_j]
     
     
     while (rad >= 1):
         
         # compute a valid search window
-        x_min, y_min = max(x_match - rad, pad), max(y_match - rad, pad)
-        x_max, y_max = min(x_match + rad, w-pad), min(y_match + rad, h-pad)
+        i_min, j_min = max(i_match - rad, m), max(j_match - rad, m)
+        i_max, j_max = min(i_match + rad, h-m), min(j_match + rad, w-m)
         
         # randomly sample a shift
-        rx, ry = np.random.randint(x_min, x_max), np.random.randint(y_min, y_max)
+        r_i, r_j = np.random.randint(i_min, i_max), np.random.randint(j_min, j_max)
         
         # compute distance to sample
-        rdist = fdist(A1, B1, A2, B2, px, py, rx, ry, half_patch)
+        dist_random = fdist(A1, B1, A2, B2, p_i, p_j, r_i, r_j, m)
         
-        if rdist < dist_match:
-            x_match, y_match, dist_match = rx, ry, rdist
+        if dist_random < dist_match:
+            i_match, j_match, dist_match = r_i, r_j, dist_random
         
         # reduce search radius
-        rad = np.floor(reduce_ratio * rad)
+        rad = np.floor(0.5 * rad)
         
-    # update nnf
-    nnf[:, py, px] = torch.from_numpy(np.array([y_match, x_match]))
+    # update NNF_ab
+    NNF_ab[:, p_i, p_j] = torch.from_numpy(np.array([i_match, j_match]))
     
-    return nnf
-
-def randomSearch(A1, B1, A2, B2, h, w, m, NNF_ab, i, j, L, config):
-
-    max_step = config['random_search_max_step'][L]
-
-    for k in range(config['number_of_random_patches'][L]):
-
-        # Makes sure we sample our random step to end up in a valid coordinate (within the image)
-        max_up_step = min(i - m, max_step)
-        max_down_step = min(h + m - 1 - i, max_step)
-        max_left_step = min(j - m, max_step)
-        max_right_step = min(w + m - 1 - j, max_step)
-
-        # The randomly sampled coordinates for the random patch-match
-        [x, y] = NNF_ab[:,i,j].numpy() + np.concatenate((np.random.randint(low=-max_up_step, high=max_down_step, size=(1,)), 
-                                                         np.random.randint(low=-max_left_step, high=max_right_step, size=(1,))))
-
-        # Makes sure that those coordinates lie within the limits of our image
-        x = valid(x, h, m)
-        y = valid(y, w, m)
-
-        # Extract the patch around our current position in A
-        A1_patch = Patch(A1,i,j,m)
-        A2_patch = Patch(A2,i,j,m)
-
-        # Extract current patch-match and random patch-match in B2
-        A1_current_patchMatch = Patch(B2, NNF_ab[0,i,j], NNF_ab[1,i,j], m)
-        A1_random_patchMatch = Patch(B2, x, y, m)
-
-        # Extract current patch-match and random patch-match in B1
-        A2_current_patchMatch = Patch(B1, NNF_ab[0,i,j], NNF_ab[1,i,j], m)
-        A2_random_patchMatch = Patch(B1, x, y, m)
-
-        # Computes how good both matches are
-        current_match = distance(A1_patch, A1_current_patchMatch, A2_patch, A2_current_patchMatch, mode=config['distance_mode'])
-        random_match = distance(A1_patch, A1_random_patchMatch, A2_patch, A2_random_patchMatch, mode=config['distance_mode'])
-        
-        # Looks up which match is the best. If best match is current match, nothing is changed
-        best_match = np.argmin(np.array([current_match, random_match]))
-
-        if best_match == 1:
-            NNF_ab[:,i,j] = torch.from_numpy(np.array([x,y]))
-                    
     return NNF_ab
 
 
@@ -299,7 +207,7 @@ def computeNNF(A1, B2, A2, B1, L, config, initialNNF=None):
     # Randomly initializes NNF_ab
     NNF_ab = initializeNNF(h, w, initialNNF)
     
-    # Zero-Pad images
+    # Pad and normalizes the images
     A1 = F.normalize(F.pad(A1, (m,m,m,m), mode='reflect').data).float()
     A2 = F.normalize(F.pad(A2, (m,m,m,m), mode='reflect').data).float()
     B1 = F.normalize(F.pad(B1, (m,m,m,m), mode='reflect').data).float()
@@ -308,6 +216,20 @@ def computeNNF(A1, B2, A2, B1, L, config, initialNNF=None):
     # Zero-Pad NNF_ab so its coordinate system as well as the values it contains remain consistent with the images
     NNF_ab += m
     NNF_ab = torch.squeeze(F.pad(NNF_ab.unsqueeze(0), (m,m,m,m), mode='constant', value=0)).data
+
+    # Creates and initializes a NNF_dist, a matrix that saves the distance to current best match (so we don't have to compute it all the time)
+    NNF_dist = torch.zeros(NNF_ab.size()[1:]).type(torch.FloatTensor)
+    i_range = np.arange(h) + m
+    j_range = np.arange(w) + m
+    for i in i_range:
+        for j in j_range:
+            A1_patch = Patch(A1,i,j,m)
+            A2_patch = Patch(A2,i,j,m)
+            A1_current_patchMatch = Patch(B2, NNF_ab[0,i,j], NNF_ab[1,i,j], m)
+            A2_current_patchMatch = Patch(B1, NNF_ab[0,i,j], NNF_ab[1,i,j], m)
+            current_match = distance(A1_patch, A1_current_patchMatch, A2_patch, A2_current_patchMatch, mode=config['distance_mode'])
+
+            NNF_dist[i,j] = current_match
     
     # Executes the PatchMatch algorithm n_iter times
     for step in range(config['n_iter']):
@@ -328,12 +250,12 @@ def computeNNF(A1, B2, A2, B1, L, config, initialNNF=None):
             i_range = i_range[::-1]
             j_range = j_range[::-1]
         
-        # For every valid pixel in the image
+        # For ever_i valid pixel in the image
         for i in i_range:
             if (i+1)%100 == 0 : print("Row : {0}".format(i+1))
             for j in j_range:
-                NNF_ab = propagate(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, shift, config)
-                NNF_ab = random_search(A1, B1, A2, B2, px=j, py=i, half_patch=m, nnf=NNF_ab, search_radius=config["random_search_max_step"][L]) #randomSearch(A1, B2, A2, B1, h, w, m, NNF_ab, i, j, L, config)
+                NNF_ab = propagate(A1, B2, A2, B1, h, w, m, NNF_ab, NNF_dist, i, j, shift, config)
+                NNF_ab = random_search(A1, B2, A2, B1, h, w, m, NNF_ab, NNF_dist, i, j, config, L)
     
     NNF_final = NNF_ab[:, m:-m, m:-m]
     NNF_final -= m

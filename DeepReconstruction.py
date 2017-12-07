@@ -7,44 +7,41 @@ import torch.optim as optim
 from torch.autograd import Variable
 
 # pseudo deconvolution operation implemented as a local optimisation problem
-def deconv(subnet, target, source_size, source_type, loss=nn.MSELoss, max_iter=2500):
-    # Creates the random noise initialization
-    noise = Variable(torch.randn(source_size).type(source_type), requires_grad=True)
+def deconv(model, target, noise_size, layer, loss, opt, n_iters=2500):
+
+    noise = torch.randn(noise_size).float()
+
+    if torch.cuda.is_available():
+        noise = noise.cuda()
+
+    target = target.detach()
+    noise = Variable(noise, requires_grad=True)
+    optimizer = opt([noise])
     loss_fn = loss()
-    
-    optimizer = config['optimizer']([noise])
 
-    for i in range(max_iter):
-
-        # Reinitializes the gradients
+    for i in range(n_iters):
+        
         optimizer.zero_grad()
+        
+        output = model.forward_subnet(noise, layer)
 
-        # Feed our noise to the subnet
-        output = subnet(noise)
-        
-        # Computes the loss
-        loss = loss_fn(output, target)
-        
-        # Computes the gradients
-        loss.backward()
-            
-        # Prints the loss every 200 iterations
+        loss_value = loss_fn(output, target)
+
+        loss_value.backward()
+
         if i % 200 == 0:
-            print('Iteration: {0:d}, loss: {1:.2f}'.format(i, loss.data[0]))
+            print('Iteration: {0:d}, loss: {1:.2f}'.format(i, loss_value.data[0]))
 
-        # Makes one optimization pass
         optimizer.step()
+        noise.data.clamp_(0., 1.)
 
-        # Clamps the data to make sure it is between 0. and 1.
-        noise.data.clamp_(min=0., max=1.)
-    
     return noise
 
 # determines the weight map 
 def get_weight_map(features, alpha, kappa=300, tau=0.05):
     # feature maps of shape [batch_size, channels, height, width]
     # normalizes features maps across the channel dimension
-    x = torch.norm(features, p=2, dim=1)
+    x = features # torch.norm(features, p=2, dim=1)
     # removes the batch dimension (it is always 1 for 1 image)
     x = torch.squeeze(x, 0)
     
