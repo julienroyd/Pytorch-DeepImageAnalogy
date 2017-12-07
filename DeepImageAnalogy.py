@@ -44,8 +44,8 @@ print("-----------")
 
 # THE SCRIPT -----------------------------------------------
 
-A1 = Image.open(config['image1_path'])
-B1 = Image.open(config['image2_path'])
+A1 = Image.open(config['image1_path']).convert("RGB")
+B1 = Image.open(config['image2_path']).convert("RGB")
 
 # Builds the model (on GPU if available)
 vgg = VGG19()
