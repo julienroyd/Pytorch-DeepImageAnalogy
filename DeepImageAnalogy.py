@@ -14,6 +14,8 @@ import numpy as np
 import os
 
 from PIL import Image
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 
@@ -127,6 +129,10 @@ for L in range(5,0,-1):
 
 print("\n--------\n--------\nOut of the main loop!")
 
+if not os.path.exists('Results'):
+
+    os.mkdir('Results')
+
 # Saves the NNFs
 utils.saveNNFs(os.path.join('Results', 'NNFs_ab.pkl'), NNFs_ab)
 utils.saveNNFs(os.path.join('Results', 'NNFs_ba.pkl'), NNFs_ba)
@@ -136,5 +142,31 @@ utils.saveFeatureMaps(os.path.join('Results', 'featureMaps_A1.pkl'), FeatureMaps
 utils.saveFeatureMaps(os.path.join('Results', 'featureMaps_A2.pkl'), FeatureMaps_A2)
 utils.saveFeatureMaps(os.path.join('Results', 'featureMaps_B1.pkl'), FeatureMaps_B1)
 utils.saveFeatureMaps(os.path.join('Results', 'featureMaps_B2.pkl'), FeatureMaps_B2)
+
+# Saves the rsulting figure
+nnf_ab = np.transpose(NNFs_ab[1].numpy(), axes=(1,2,0))
+nnf_ba = np.transpose(NNFs_ba[1].numpy(), axes=(1,2,0))
+
+A1 = np.asarray(A1.resize((config['img_size'],config['img_size']), Image.ANTIALIAS))
+B1 = np.asarray(B1.resize((config['img_size'],config['img_size']), Image.ANTIALIAS))
+
+A2 = B1[nnf_ab[:,:,0], nnf_ab[:,:,1], :]
+B2 = A1[nnf_ba[:,:,0], nnf_ba[:,:,1], :]
+
+images = [A1, A2, B2, B1]
+names = ['A1', 'A2', 'B2', 'B1']
+
+# Displays the images
+plt.figure(figsize=(16, 4))
+for img, title, i in zip(images, names, list(range(4))):
+    plt.subplot(1,4,i+1)
+    plt.imshow(img)
+    plt.title(title)
+    plt.axis("off")
+plt.show()
+
+figname = os.path.basename(config['image1_path']).split('.')[0] + '_' + os.path.basename(config['image2_path']).split('.')[0] + '.png'
+plt.savefig(os.path.join('Results', figname), bbox_inches='tight')
+print('saved Feature Maps in : {0}'.format(os.path.join('Results', figname)))
 
 print("-----DONE!-----")
