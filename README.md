@@ -7,3 +7,22 @@ Deep Image Analogy is a adaptation of Image Style Transfer [[Gatys et al. 2016]]
 The following images are examples of the kind of results that we are able to get so far. It is definitely trying to do the right thing, but that are still some artefacts that need to be improved.
 ![](examples.png)
 
+### Dependencies
+
+We use Python 3.6.1, along with the following dependencies.
+
+* pytorch : `pip install pytorch==0.2`
+* numpy : `pip install numpy==1.13.3`
+* matplotlib : `pip install matplotlib==2.0.2`
+* torchvision : `pip install torchvision`
+
+###### Python built-in dependencies
+
+* pickle
+* os
+
+### To run
+
+1. Edit `config.py` to choose the image you want to run on
+2. Run using `python DeepImageAnalogy.py`
+3. When it is done, the results will be saved in `Result/` folder. If you had `config['save_NNFs'] = True` and `config['save_FeatureMaps'] = True` in the config file, you can also open a notebook using `jupyter-notebook Visualize.ipynb` and visualize the generated Feature Maps and NNFs there.
