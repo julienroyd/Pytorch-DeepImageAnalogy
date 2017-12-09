@@ -8,8 +8,12 @@ config = {}
 config['device'] = 0 # 0,1,2 or 3
 
 # IMAGES
-config['image1_path'] = os.path.join('Images', "avatar.png")
-config['image2_path'] = os.path.join('Images', "joconde.png")
+config['image1_path'] = os.path.join('Images', "felix2.png")
+config['image2_path'] = os.path.join('Images', "david2.png")
+
+# SAVING
+config['save_NNFs'] = True
+config['save_FeatureMaps'] = True
 
 # VGG
 config['img_size'] = 224  # 56, 112, 224, 448
@@ -17,7 +21,7 @@ config['pool_mode'] = 'avg' # 'avg' or 'max'
 
 # PATCH-MATCH
 config['patch_size'] = {1:5, 2:5, 3:3, 4:3, 5:3}
-config['n_iter'] = 2
+config['n_iter'] = 4
 config['distance_mode'] = 'bidirectional' # 'unidirectional' or 'bidirectional'
 config['random_search_max_step'] = {1:4, 2:4, 3:6, 4:6, 5:14} 
 
