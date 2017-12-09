@@ -16,7 +16,7 @@ We use Python 3.6.1, along with the following dependencies. I assume you use a c
 * matplotlib : `pip install matplotlib==2.0.2`
 * torchvision : `pip install torchvision`
 
-###### Python built-in dependencies
+##### Python built-in dependencies
 
 * pickle
 * os
