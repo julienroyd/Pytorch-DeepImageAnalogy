@@ -9,9 +9,9 @@ The following images are examples of the kind of results that we are able to get
 
 ### Dependencies
 
-We use Python 3.6.1, along with the following dependencies.
+We use Python 3.6.1, along with the following dependencies. I assume you use a conda virtual environment. If you don't, use `pip3` instead of `pip`.
 
-* pytorch : `pip install pytorch==0.2`
+* pytorch : `pip install http://download.pytorch.org/whl/cu80/torch-0.3.0.post4-cp36-cp36m-linux_x86_64.whl`
 * numpy : `pip install numpy==1.13.3`
 * matplotlib : `pip install matplotlib==2.0.2`
 * torchvision : `pip install torchvision`
