@@ -132,7 +132,7 @@
                 <figure>
                     <center><img class="image" src="images/warp.png"></center>
                     <figcaption class="toRender" style="text-align: center;">
-                        The result of applying the <dt-cite key="barnes2010">Ranomized PacthMatch</dt-cite> algorithm on two images : it maps <i>image A</i> to <i>image B</i>.
+                        The result of applying the Randomized PatchMatch algorithm on two images : it maps <i>image A</i> to <i>image B</i>.
                         A warping operation using the constructed NNF is applied on <i>image B</i> to recover <i>image A</i>.
                     </figcaption>
                 </figure>
@@ -254,108 +254,143 @@
                 </p>
 
             <h3 class="sub-section-title">3. Implementation details</h3>
-                <p> Our implementation of Deep Image Analogy is in Python, and uses the deep learning framework pytorch for manipulating tensors and easily use and compare optimization algorithms. The PatchMatch steps, being highly dependant on intricate loops are processed on CPU. The reconstruction phase formulated as an optimization problem is computed on GPU. We use the squared Euclidean distance for similarity metric between deep patches.</p>
+                <p> Our implementation of Deep Image Analogy is in Python, and uses the deep learning framework pytorch for manipulating tensors and easily use and compare optimization algorithms. The PatchMatch steps, being highly dependant on intricate loops are processed on CPU. The reconstruction phase formulated as an optimization problem is computed on GPU. We use the squared Euclidean distance for similarity metric between deep patches. One experiment takes around 10 minutes to run using an Intel core i7 and an Nvidia GTX 1080.</p>
 
 
             <hr> <!--Separation line-->
             <!-- SECTION ____________________________________________________________________________-->
             <h2 class="section-title">Results and discussion</h2>
-                <p> Blablabla</p>
+                <p> 
+                    The current state of our implementation demonstrates the capability of the technique to do style transfer in a semantically consistent manner. Some result examples can be found on the next figure. We reiterate that <i>A1</i> and <i>B1</i> are the reference images. <i>A2</i> is the image resulting of applying the style of <i>B1</i> to the content of <i>A1</i>. Similarly, <i>B2</i> is obtained by applying the style of <i>A1</i> to the content in <i>B1</i>. All of those results were obtained with the same hyper-parameters.
+                </p>
+
+                <figure id="" style="padding:5px 5px 0px 0px">
+                  <center style="position:relative; top:-35px">
+                    <img class="image" src="images/more_examples.png" hight="400px">
+                  </center>
+                  <figcaption class="toRender">
+                      Some results obtained with our implementation of Deep Image Analogy.
+                  </figcaption>
+                </figure>
+
+                <p> 
+                    As our eyes are very good at detecting what seem un-natural in an image, the first thing that one might focus on are the remaining color artefacts on the resulting images <i>A2</i> and <i>B2</i>. With the time that we had left for this project, we haven't been able to remove every remaining artefacts. However, it is worth noticing that those artefacts are a lot less critical than in the version of the algorithm presented in class (see slides.pdf).
+                </p>
+
+                <p> 
+                    However, when we focus on the semantic analogies between the reference images, we can see that our implementation is quite successful at adapting to be a mix of the references. For instance, we can see that the eyes and hair of image <i>A2</i> in the second row look similar to the eyes and hair of reference <i>B1</i>, but that the general shape is still the one from <i>A1</i>. Those analogies still work for different objects like boats. In the third row, we can see that the boat sails style are correctly swaped (minus the color artefacts).
+                </p>
+
 
             <h3 class="sub-section-title">Comparisons</h3>
 
+                <p>
+                    To evaluate the successes and flaws of our implementation, we run the algorithm on some examples from the original Deep Image Analogy paper<dt-cite key="liao2017"></dt-cite>. On the two next figures, our implementation results are shown on the first row, and the original results takent from the paper are shown on the second row. The first comparison mixes a .
+                </p>
+
+                <figure id="" style="padding:5px 5px 0px 0px">
+                  <center style="position:relative; top:-35px">
+                    <img class="image" src="images/comparison_original_monalisa.png" hight="400px">
+                  </center>
+                  <figcaption class="toRender">
+                      Style transfer from photo to painting. The first image is a photorealistic computer generated image from the movie Avatar, while the second is the famously known Monalisa painting. First row is our implementation, second row are the results from the original Deep Image Analogy.
+                  </figcaption>
+                </figure>
+
+                <figure id="" style="padding:5px 5px 0px 0px">
+                  <center style="position:relative; top:-35px">
+                    <img class="image" src="images/comparison_original_panda.png" hight="400px">
+                  </center>
+                  <figcaption class="toRender">
+                      Style transfer from photo to drawing, both representing pandas. First row is our implementation, second row are the results from the original Deep Image Analogy.
+                  </figcaption>
+                </figure>
+
+                <p>
+                    In both these comparisons, we show that on a high (semantic) level, our results are very similar to those generated by the original authors. However, the small scale details of our generations are considerably more pixelized, and important color artefacts can be found in some images. Those artefacts could be due to the fact that we didn't use the exact same distance metric for PatchMatch than in the original paper. For computal efficiency we chose to use the simpler Euclidean distance rather than using the Gramian-like distance used in the paper, that would be considerably longer to compute. In future works, we might try to implement an efficient yet more complex distance metric to try to improve those small scale details.
+                </p>
+
+                <p>
+                    We also compare with the original Neural Style Transfer approach<dt-cite key="gatys2016"></dt-cite> and show that our implementation of Deep Image Analogy performs style transfer in a much more coherent way. In the first comparison, we can see that Neural Style Transfer performs better style transfer from painting to photo (see result <i>A2</i>) which is expected, as this algorithm has been designed specifically with those cases in mind. However, when performing style transfer by taking the style from something that is not a uniformly colored painting, we can see that Neural Style Transfer performs much worse than our implementation of Deep Image Analogy. Indeed, the original Neural Style Transfer doesn't take into account what kinf od objects are present in the scene, and therefore, simply blends the colors and traits of the style-reference and applies it uniformly to the content-reference, with total disregard about where each color or each texture should be applied in the resulting image.
+                </p>
+
+                <figure id="" style="padding:5px 5px 0px 0px">
+                  <center style="position:relative; top:-35px">
+                    <img class="image" src="images/gatys_comparison_city.png" hight="400px">
+                  </center>
+                  <figcaption class="toRender">
+                      Style transfer from painting to photo. We can see that on <i>A2</i>, Neural Style Transfer performs a bit better than our implementation of Deep Image Analogy.
+                  </figcaption>
+                </figure>
+
+                <figure id="" style="padding:5px 5px 0px 0px">
+                  <center style="position:relative; top:-35px">
+                    <img class="image" src="images/gatys_comparison_avatar.png" hight="400px">
+                  </center>
+                  <figcaption class="toRender">
+                      Style transfer from painting to photo with semantic correspondances. We can see that on Neural Style Transfer isn't doing the right thing at all. It doesn't know where are the eyes, ears, hair and mouth and instead almost uniformly applies some sort of blending of the style-reference to the content-reference.
+                  </figcaption>
+                </figure>
+
+                <figure id="" style="padding:5px 5px 0px 0px">
+                  <center style="position:relative; top:-35px">
+                    <img class="image" src="images/gatys_comparison_manga.png" hight="400px">
+                  </center>
+                  <figcaption class="toRender">
+                      Style transfer from drawing to drawing with semantic correspondances. Again our implementation performs much better.
+                  </figcaption>
+                </figure>
+
+
             <h3 class="sub-section-title">Limitations</h3>
 
+            <p>
+                We show some results on face to face style transfers with portraits of our colleagues.
+            </p>
+            
+
+                <figure id="" style="padding:5px 5px 0px 0px">
+                  <center style="position:relative; top:-35px">
+                    <img class="image" src="images/lab_team.png" hight="400px">
+                  </center>
+                  <figcaption class="toRender">
+                      Face to face style transfer. 1rst row, from left to right : Raymond Li, Raymond Roy, Julien Li and Julien Roy. 2nd row, from left to right : Félix Harvey, Félix Kanaa, David Harvey and David Kanaa.
+                  </figcaption>
+                </figure>
+
+            <p>
+                Again, we notice limitations of small-scale textures and large color-artefacts. Our implementation seem to sometimes mix regions of homogenous color (for instance, on the second row, the homogenous shirt contain a color-patch of the homogenous background wall). This effect might be due to the fact that in the deeper layers of VGG, the feature maps might not contain very specific activations for representing those homogenous regions such as uniformly colored clothes or backgrounds.
+            </p>
+
+
+            <p>
+                Moreover, a known limitation of Deep Image Analogy happens when one of the reference image contain an object of semantical importance that is not contained in the other reference. For instance, if one of the subject had a hat or other large accessory, the algorithm would be incapable of finding a corresponding region in the other reference and would probably fill the hat region with some other similar texture that would lead to weird shapes in the resulting images.
+            </p>
+
+            <p>
+                Finally, because VGG is not trained to be invariant to elastic transformations in the input, the algorithm struggles when the two references contain semantic correspondances but with very different shapes. An example of such case is presented in the next figure.
+            </p>
+
+                <figure id="" style="padding:5px 5px 0px 0px">
+                  <center style="position:relative; top:-35px">
+                    <img class="image" src="images/homer_peter.png" hight="400px">
+                  </center>
+                  <figcaption class="toRender">
+                      Cartoon to cartoon style transfer. Because both faces have very different shapes, the algorithm tries to widen <i>A2</i> in order to make it look more similar to <i>B1</i>. Also, the absence of beard region in <i>B1</i> makes it hard to know where to represent <i>A1's</i> beard in <i>B2</i>.
+                  </figcaption>
+                </figure>
 
             <hr> <!--Separation line-->
             <!-- SECTION ____________________________________________________________________________-->
             <h2 class="sub-section-title">Conclusion</h2>
-                <p> Blablabla</p>
+                <p> We implemented a working version of the Deep Image Analogy algorithm. While our current implementation still produces important artefacts, we demonstrated that it successfully accomplishes the main transformation that is was designed to do, which is to perform style transfer between images in a semantically consistent manner. Our future works aim on improving the quality of our results by trying new distance metrics for the PatchMatch phase and look into post-processing possibilities to improve the small scale details.</p>
 
-
-            <!-- SECTION ____________________________________________________________________________-->
-            <h3>Examples of formatting</h3>
-                <p class="toRender">
-                    In a regular RNN, at <i>italic text</i>, the cell state $h_t$ is computed based on its own input and the cell state $h_t$ that encapsulates some information from the precedent inputs : $$h_t = f(W^{hx}x_t + W^{hh}h_{t-1})$$
-                </p>
-
-                <p>
-                    The following figure presents a Seq2Seq model with a two layers encoder and a two layers decoder:
-                    <img class="image" src="images/exemple.jpg">
-                </p>
-                <p>
-                    However, to better overcome the information bottleneck and long-term dependencies limitations, attentions model have been introduced. The basic idea of attention is that instead of attempting to learn a single vector representation for each sentence, we keep around vectors for every word in the input sentence, and reference these vectors at each decoding step.
-                </p>
-                <ul>
-                    <li>
-                        <p class="toRender">
-                            Blablabla
-                        </p>
-                    </li>
-                    <li>
-                        <p class="toRender">
-                            Blablabla $b_{t} = (b_{t0}, ... ,b_{tT})^T$ is then passed throught a softmax function.
-                            $$\alpha_{tj} = softmax(b_{tj}) = \frac{exp(b_{tj})}{\sum_{k=1}^{T} exp(b_{tk})}$$
-                        </p>
-                    </li>
-                    <li>
-                        <p class="toRender">
-                            Blablabla
-                        </p>
-                    </li>
-                </ul>
-                <p>
-                    Remember that for :
-                    </p><figure id="iteratespluserror" style="width:610px; height:105px; display:block; margin-left:auto; margin-right:auto; position:relative">
-                        <div style="position:relative; top:-35px">
-                            <span class="toRender" style="position:absolute; left:0px; top:0px">
-                                $$p(y_t = y_k|y_{&lt; t}, x)$$
-                            </span>
-                            <figcaption class="toRender" style="position:absolute; left:00px; top:105px; width:120px;">
-                                Caption here
-                            </figcaption>
-                            <span class="toRender" style="position:absolute; left:170px; top:0px">
-                                $$=$$
-                            </span>
-                            <span class="toRender" style="position:absolute; left:200px; top:0px">
-                                $$e^{w_k^Tg(y_{t-1}, h_t, c_t)}$$
-                            </span>
-                            <figcaption class="toRender" style="position:absolute; left:200px; top:105px;width:210px;">
-                                Caption there
-                            </figcaption>
-                            <span class="toRender" style="position:absolute; left:400px; top:0px">
-                                $$/$$
-                            </span>
-                            <span class="toRender" style="position:absolute; left:440px; top:-10px">
-                                $$\displaystyle{\sum_{k^{'} \in K} e^{w_{k^{'}}^Tf(y_{t-1}, h_t, c_t)}}$$
-                            </span>
-                            <figcaption class="toRender" style="position:absolute; left:440px; top:105px;width:200px;">
-                                Finally, the sum of all $|K|$ logits.
-                            </figcaption>
-                        </div>
-                    </figure>
-
-                <p>
-                    The main idea of the proposed approach is to approximate the second term of the gradient (i.e
-                    <dt-fn>
-                    Small explanation in a box
-                    </dt-fn>)
-                    , by importance sampling
-                    <dt-fn>
-                    Second eexplanation in a tiny beautiful box
-                </p>
-                <p class="toRender">
-                    <b>
-                        Bold stuff:
-                    </b>
-                    Blablablabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla blabla.
-                </p>
 
 
         <dt-appendix class="left">
         </dt-appendix>
         <h3>Acknowledgments</h3>
-            <p>Thank you to Pr. Christopher Pal for allowing us to use GPUs from his server to perform our experiments.</p>
+            <p>We want to thank Pr. Christopher Pal for allowing us to use GPUs from his server to perform our experiments. We also thank our colleagues from the lab which kindly accepted to allow us to experiment on their portrait in the name of Science.</p>
 
         <script type="text/javascript">
             var el = document.getElementsByClassName("toRender")
