@@ -23,6 +23,6 @@ We use Python 3.6.1, along with the following dependencies. I assume you use a c
 
 ### To run
 
-1. Edit `config.py` to choose the image you want to run on
+1. Edit `config.py` to choose the images you want to run on
 2. Run using `python DeepImageAnalogy.py`
 3. When it is done, the results will be saved in `Result/` folder. If you had `config['save_NNFs'] = True` and `config['save_FeatureMaps'] = True` in the config file, you can also open a notebook using `jupyter-notebook Visualize.ipynb` and visualize the generated Feature Maps and NNFs there.
